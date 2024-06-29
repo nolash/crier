@@ -1,0 +1,20 @@
+[package]
+name = "crier"
+version = "0.0.1"
+edition = "2021"
+rust-version = "1.79"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#rss = "^2.0.3"
+feed-rs = "^2.0.0"
+#activitypub_federation = "^0.4.0"
+#json-ld = "^0.14.1"
+clap = "2.34.0"
+#quick-xml = "^0.28.2"
+
+[dev-dependencies]
+tempfile = "3.3.0"
+
+
