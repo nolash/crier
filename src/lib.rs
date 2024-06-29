@@ -3,6 +3,7 @@ use std::hash::Hasher;
 use std::hash::Hash;
 use std::iter::Iterator;
 use feed_rs::model::Entry;
+use rs_sha512::Sha512Hasher;
 
 pub struct Sequencer {
     pub items: HashMap<u32, Vec<u8>>,
@@ -10,10 +11,9 @@ pub struct Sequencer {
     crsr: usize,
 }
 
-pub struct SequencerEntry<'a> {
+pub struct SequencerEntry {
     entry: Entry,
-    summer: &'a dyn Hasher,
-    digest: Vec<u8>,
+    digest: u64,
 }
 
 impl Sequencer {
@@ -30,22 +30,24 @@ impl Sequencer {
     }
 }
 
-impl<'a> SequencerEntry<'a> {
-    pub fn new(entry: Entry, summer: &'a dyn Hasher) -> SequencerEntry<'a> {
-        SequencerEntry {
+impl SequencerEntry {
+    pub fn new(entry: Entry, summer: &mut Sha512Hasher) -> SequencerEntry {
+        let mut o = SequencerEntry {
             entry: entry,
-            summer: summer,
-            digest: Vec::new(),
-        }
+            digest: 0,
+        };
+        o.hash(summer);
+        o.digest  = summer.finish();
+        o
     }
 }
 
-//impl<'a> Hash for SequencerEntry<'a> {
-//    fn hash(&self) -> u64 {
-//        Vec::<u64>::new()
-//    }
-//}
-//
+impl Hash for SequencerEntry {
+    fn hash<H: Hasher>(&self, h: &mut H) {
+            h.write(self.entry.id.as_bytes());
+    }
+}
+
 
 impl Iterator for Sequencer {
     type Item = Vec<u8>;
@@ -66,8 +68,8 @@ mod tests {
 
     #[test]
     fn test_entry() {
-        let h = Sha512Hasher::default();
+        let mut h = Sha512Hasher::default();
         let src = Entry::default();
-        let entry = SequencerEntry::new(src, &h);
+        let entry = SequencerEntry::new(src, &mut h);
     }
 }
