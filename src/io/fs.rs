@@ -19,8 +19,3 @@ impl FeedGet for Fs {
         Ok(feed)
     }
 }
-
-
-//pub get() -> Entry {
-//
-//}

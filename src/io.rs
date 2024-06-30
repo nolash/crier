@@ -14,4 +14,5 @@ pub trait FeedPut {
     fn put(&self, feed: &Feed, s: &str, method: Option<FeedMethod>) -> u64;
 }
 
+#[cfg(feature = "fs")]
 pub mod fs;

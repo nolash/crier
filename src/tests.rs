@@ -1,6 +1,8 @@
 use super::Sequencer;
 use feed_rs::model::Entry;
 use super::io::FeedGet;
+
+#[cfg(feature = "fs")]
 use super::io::fs::Fs;
 
 #[test]
@@ -19,6 +21,7 @@ fn test_entry_guard() {
 }
 
 #[test]
+#[cfg(feature = "fs")]
 fn test_feed_get() {
     let r: bool;
     let fs = Fs{};
