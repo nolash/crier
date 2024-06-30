@@ -4,16 +4,17 @@ use std::hash::Hash;
 use std::iter::Iterator;
 use feed_rs::model::Entry;
 use rs_sha512::Sha512Hasher;
+use chrono::DateTime;
 mod io;
 
 pub struct Sequencer {
-    pub items: HashMap<u32, Vec<u8>>,
-    item_keys: Vec<u32>,
+    pub items: HashMap<u64, Vec<u8>>,
+    item_keys: Vec<u64>,
     crsr: usize,
 }
 
 pub struct SequencerEntry {
-    pub digest: u32,
+    pub digest: u64,
     entry: Entry,
 }
 
@@ -22,7 +23,7 @@ impl Sequencer {
         Sequencer {
             items: HashMap::new(),
             crsr: 0,
-            item_keys: Vec::<u32>::new(),
+            item_keys: Vec::<u64>::new(),
         }
     }
 
@@ -40,7 +41,7 @@ impl Iterator for Sequencer {
     type Item = Vec<u8>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let c: u32;
+        let c: u64;
 
         c = self.item_keys[self.crsr];
         return Some(self.items[&c].clone());
@@ -49,13 +50,25 @@ impl Iterator for Sequencer {
 
 impl SequencerEntry {
     pub fn new(entry: Entry) -> SequencerEntry {
+        let mut id_part: u32;
         let mut o = SequencerEntry {
             entry: entry,
             digest: 0,
         };
+        match &o.entry.published {
+            Some(v) => {
+                id_part = v.timestamp() as u32;
+                o.digest = id_part as u64;
+                o.digest <<= 32;
+            },
+            None => {
+            },
+        }
+        
         let mut h = Sha512Hasher::default();
         o.hash(&mut h);
-        o.digest = h.finish() as u32;
+        id_part = h.finish() as u32;
+        o.digest += id_part as u64;
         o
     }
 }

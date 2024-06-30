@@ -1,6 +1,8 @@
 use super::Sequencer;
 use feed_rs::model::Entry;
 use super::io::FeedGet;
+use chrono::DateTime;
+use chrono::offset::Utc;
 
 #[cfg(feature = "fs")]
 use super::io::fs::Fs;
@@ -11,13 +13,22 @@ fn test_entry_guard() {
     let mut seq = Sequencer::new();
     let mut src = Entry::default();
     src.id = String::from("foo");
+    //src.published = Some(DateTime::<Utc>::default());
+    src.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
     r = seq.add(src);
     assert!(r);
 
     let mut src_two = Entry::default();
     src_two.id = String::from("foo");
+    src_two.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
     r = seq.add(src_two);
     assert!(!r);
+
+    let mut src_three = Entry::default();
+    src_three.id = String::from("foo");
+    src_three.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+03:00").unwrap().into());
+    r = seq.add(src_three);
+    assert!(r);
 }
 
 #[test]
