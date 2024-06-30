@@ -4,6 +4,7 @@ use std::hash::Hash;
 use std::iter::Iterator;
 use feed_rs::model::Entry;
 use rs_sha512::Sha512Hasher;
+mod io;
 
 pub struct Sequencer {
     pub items: HashMap<u32, Vec<u8>>,
@@ -72,23 +73,4 @@ impl Hash for SequencerEntry {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::Sequencer;
-    use feed_rs::model::Entry;
-
-    #[test]
-    fn test_entry_guard() {
-        let mut r: bool;
-        let mut seq = Sequencer::new();
-        let mut src = Entry::default();
-        src.id = String::from("foo");
-        r = seq.add(src);
-        assert!(r);
-
-
-        let mut src_two = Entry::default();
-        src_two.id = String::from("foo");
-        r = seq.add(src_two);
-        assert!(!r);
-    }
-}
+mod tests;
