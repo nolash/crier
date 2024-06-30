@@ -41,3 +41,14 @@ fn test_feed_get() {
     r = seq.add(feed.entries.get(0).unwrap().clone()); 
     assert!(r);
 }
+
+#[test]
+#[cfg(feature = "fs")]
+fn test_feed_all() {
+    let r: i64;
+    let fs = Fs{};
+    let feed = fs.get("testdata/test.atom.xml", None).unwrap();
+    let mut seq = Sequencer::new();
+    r = seq.add_all(feed); 
+    assert_eq!(r, 15);
+}

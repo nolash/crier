@@ -3,6 +3,7 @@ use std::hash::Hasher;
 use std::hash::Hash;
 use std::iter::Iterator;
 use feed_rs::model::Entry;
+use feed_rs::model::Feed;
 use rs_sha512::Sha512Hasher;
 use chrono::DateTime;
 mod io;
@@ -35,6 +36,17 @@ impl Sequencer {
         self.items.insert(o.digest, o.into());
         return true;
     }
+
+    pub fn add_all(&mut self, feed: Feed) -> i64 {
+        let mut c: i64;
+
+        c = 0;
+        for v in feed.entries.iter() {
+            self.add(v.clone());
+            c += 1;
+        }
+        c
+    }
 }
 
 impl Iterator for Sequencer {
@@ -50,19 +62,36 @@ impl Iterator for Sequencer {
 
 impl SequencerEntry {
     pub fn new(entry: Entry) -> SequencerEntry {
+        let mut have_date: bool;
         let mut id_part: u32;
         let mut o = SequencerEntry {
             entry: entry,
             digest: 0,
         };
+
+        have_date = false;
         match &o.entry.published {
             Some(v) => {
                 id_part = v.timestamp() as u32;
                 o.digest = id_part as u64;
                 o.digest <<= 32;
+                have_date = true;
             },
             None => {
             },
+        }
+
+        if !have_date {
+            match &o.entry.updated {
+                Some(v) => {
+                    id_part = v.timestamp() as u32;
+                    o.digest = id_part as u64;
+                    o.digest <<= 32;
+                    have_date = true;
+                },
+                None => {
+                },
+            }
         }
         
         let mut h = Sha512Hasher::default();
