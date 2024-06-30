@@ -12,8 +12,8 @@ pub struct Sequencer {
 }
 
 pub struct SequencerEntry {
+    pub digest: u32,
     entry: Entry,
-    digest: u64,
 }
 
 impl Sequencer {
@@ -25,29 +25,15 @@ impl Sequencer {
         }
     }
 
-    pub fn add<H: Hash>(&self, entry: SequencerEntry) {
-//        entry.hash(&self, entry);
+    pub fn add(&mut self, entry: Entry) -> bool {
+        let o = SequencerEntry::new(entry);
+        if self.items.contains_key(&o.digest) {
+            return false;
+        }
+        self.items.insert(o.digest, o.into());
+        return true;
     }
 }
-
-impl SequencerEntry {
-    pub fn new(entry: Entry, summer: &mut Sha512Hasher) -> SequencerEntry {
-        let mut o = SequencerEntry {
-            entry: entry,
-            digest: 0,
-        };
-        o.hash(summer);
-        o.digest  = summer.finish();
-        o
-    }
-}
-
-impl Hash for SequencerEntry {
-    fn hash<H: Hasher>(&self, h: &mut H) {
-            h.write(self.entry.id.as_bytes());
-    }
-}
-
 
 impl Iterator for Sequencer {
     type Item = Vec<u8>;
@@ -60,16 +46,49 @@ impl Iterator for Sequencer {
     }
 }
 
+impl SequencerEntry {
+    pub fn new(entry: Entry) -> SequencerEntry {
+        let mut o = SequencerEntry {
+            entry: entry,
+            digest: 0,
+        };
+        let mut h = Sha512Hasher::default();
+        o.hash(&mut h);
+        o.digest = h.finish() as u32;
+        o
+    }
+}
+
+impl Into<Vec<u8>> for SequencerEntry {
+    fn into(self) -> Vec<u8> {
+        return String::from(self.entry.id).into_bytes();
+    }
+}
+
+impl Hash for SequencerEntry {
+    fn hash<H: Hasher>(&self, h: &mut H) {
+            h.write(self.entry.id.as_bytes());
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use rs_sha512::Sha512Hasher;
-    use super::SequencerEntry;
+    use super::Sequencer;
     use feed_rs::model::Entry;
 
     #[test]
-    fn test_entry() {
-        let mut h = Sha512Hasher::default();
-        let src = Entry::default();
-        let entry = SequencerEntry::new(src, &mut h);
+    fn test_entry_guard() {
+        let mut r: bool;
+        let mut seq = Sequencer::new();
+        let mut src = Entry::default();
+        src.id = String::from("foo");
+        r = seq.add(src);
+        assert!(r);
+
+
+        let mut src_two = Entry::default();
+        src_two.id = String::from("foo");
+        r = seq.add(src_two);
+        assert!(!r);
     }
 }
