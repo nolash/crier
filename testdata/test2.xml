@@ -1,0 +1,1008 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <generator uri="https://blog.rust-lang.org/" version="0.1.0">Rust Blog</generator>
+    <link href="https://blog.rust-lang.org/feed.xml" rel="self" type="application/atom+xml" />
+    <link href="https://blog.rust-lang.org/" rel="alternate" type="text/html" />
+    <id>https://blog.rust-lang.org/</id>
+    <title>Rust Blog</title>
+    <subtitle>Empowering everyone to build reliable and efficient software.</subtitle>
+    <author>
+        <name>Maintained by the Rust Teams.</name>
+        <uri>https://github.com/rust-lang/blog.rust-lang.org/</uri>
+    </author>
+    <updated>2024-06-26T23:17:01+00:00</updated>
+
+    <entry>
+        <title>Types Team Update and Roadmap</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/06/26/types-team-update.html" type="text/html" title="Types Team Update and Roadmap" />
+        <published>2024-06-26T00:00:00+00:00</published>
+        <updated>2024-06-26T00:00:00+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/06/26/types-team-update.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/06/26/types-team-update.html">&lt;p&gt;It has been more than a year since &lt;a href&#x3D;&quot;https://blog.rust-lang.org/2023/01/20/types-announcement.html&quot;&gt;the initial blog post&lt;/a&gt; announcing the Types team, and our initial set of goals. For details on what the team is, why it was formed, or our previously-stated overarching goals, go check out that blog post. In short the Types team&#x27;s purview extends to the parts of the Rust language and compiler that involve the type system, e.g. type checking, trait solving, and borrow checking. Our short and long term goals effectively work to make the type system sound, consistent, extensible, and fast.&lt;/p&gt;
+&lt;p&gt;Before getting into details, it&#x27;s worth sharing a quick point: the team over the last year has been very successful. Oftentimes, it&#x27;s hard to measure impact, particularly when long-term roadmap goals are hard to quantify progress on and various short-term goals either are hit or aren&#x27;t. But, there is one clear statistic that is somewhat indicative of the team&#x27;s progress: over the last year or so, &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/pulls?q&#x3D;is%3Apr+label%3AT-types+label%3Adisposition-merge+is%3Amerged+closed%3A%3E2023-01-20+sort%3Acreated-asc+&quot;&gt;more than 50 user-facing changes&lt;/a&gt; have landed, each separately approved by Types Team consensus through FCP.&lt;/p&gt;
+&lt;p&gt;The changes lie at the boundary between language design and implementation, and the Types Team (which is a subteam of both the Language and Compiler Teams) existing means that not only does the Rust Project have the bandwidth to make these decisions but we also have enough people with the knowledge and experience of the type system to make informed decisions that overall make the language better.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#the-priorities-of-the-types-team&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;the-priorities-of-the-types-team&quot;&gt;&lt;/a&gt;The priorities of the types team&lt;/h2&gt;
+&lt;p&gt;To evaluate our progress over the last year and our roadmap going forward,
+lets start with our main priorities in order of importance. We will refer
+to them during the remainder of this post. To reach our goals, we need a
+a healthy group of maintainers which have the expertise and capacity to
+react to issues and to implement complex changes.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#the-type-system-should-be-sound&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;the-type-system-should-be-sound&quot;&gt;&lt;/a&gt;The type system should be Sound&lt;/h3&gt;
+&lt;p&gt;One of the main promises of Rust is that there cannot be undefined behavior when using
+only safe code. It might surprise you that there are currently &lt;a href&#x3D;&quot;https://github.com/orgs/rust-lang/projects/44/views/1&quot;&gt;known type system
+bugs&lt;/a&gt; which break these guarantees. Most of these issues were found by people familiar with
+the inner workings of the compiler by explicitly looking for them and we generally do not expect
+users to encounter these bugs by accident. Regardless, we deeply care about fixing them
+and are working towards a fully sound and ideally verified type system.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#the-type-system-should-be-consistent&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;the-type-system-should-be-consistent&quot;&gt;&lt;/a&gt;The type system should be Consistent&lt;/h3&gt;
+&lt;p&gt;The type system should be easy to reason about. We should avoid rough edges and
+special-cases if possible. We want to keep both the implementation and user-facing behavior
+as simple as possible. Where possible we want to consider the overall design instead of
+providing local targeted fixes. This is necessary to build trust in the soundness of the
+type system and allows for a simpler mental model of Rust.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#the-type-system-should-be-extensible&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;the-type-system-should-be-extensible&quot;&gt;&lt;/a&gt;The type system should be Extensible&lt;/h3&gt;
+&lt;p&gt;Rust is still evolving and we will be required to extend the type system to enable new
+language features going forward. This requires the type system to be extensible and
+approachable. The design of the language should not be adapted to work around
+short-comings of its current type system implementation. We should collaborate with
+other teams and users to make sure we&#x27;re aware of their problems and consider possible
+future extensions in our implementation and design.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#the-type-system-should-be-fast&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;the-type-system-should-be-fast&quot;&gt;&lt;/a&gt;The type system should be Fast&lt;/h3&gt;
+&lt;p&gt;We care about the compile times of Rust and want to consider the impact on compile times
+of our designs. We should look for effective approaches to speed up the existing implementation,
+by improving caching or adding fast paths where applicable. We should also be aware of the
+compile time impact of future additions to the type system and suggest more performant
+solutions where possible.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#updates&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;updates&quot;&gt;&lt;/a&gt;Updates&lt;/h2&gt;
+&lt;p&gt;We have been very active over the last year and made some significant progress. There
+are also a few non-technical updates we would like to share.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#organizational-updates&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;organizational-updates&quot;&gt;&lt;/a&gt;Organizational updates&lt;/h2&gt;
+&lt;p&gt;First, a huge welcome to the two new members to team since the announcement post: &lt;a href&#x3D;&quot;https://github.com/boxyuwu&quot;&gt;@BoxyUwU&lt;/a&gt; and &lt;a href&#x3D;&quot;https://github.com/aliemjay&quot;&gt;@aliemjay&lt;/a&gt;. &lt;a href&#x3D;&quot;https://github.com/boxyuwu&quot;&gt;@BoxyUwU&lt;/a&gt; has been doing a lot of work on const generics and made significant contributions to the design of the next generation trait solver. &lt;a href&#x3D;&quot;https://github.com/aliemjay&quot;&gt;@aliemjay&lt;/a&gt; has been working on some very subtle improvements to opaque types - &lt;code&gt;impl Trait&lt;/code&gt; - and to borrow checking. They are both invaluable additions to the team.&lt;/p&gt;
+&lt;p&gt;We also organized another in-person Types Team meetup last October, immediately prior to EuroRust. We discussed the state of the team, looked at current implementation challenges and in-progress work, and reviewed and updated &lt;a href&#x3D;&quot;https://blog.rust-lang.org/2023/01/20/types-announcement.html#roadmap&quot;&gt;the roadmap from the previous meetup&lt;/a&gt;. Most of this will be covered in this blog post.&lt;/p&gt;
+&lt;p&gt;Finally, as discussed in the &lt;a href&#x3D;&quot;https://rust-lang.github.io/rfcs/3254-types-team.html&quot;&gt;RFC&lt;/a&gt;, we would like to have leads rotate out regularly, largely to help share the burden and experience of leads&#x27; work. So with that being said, &lt;a href&#x3D;&quot;https://github.com/nikomatsakis&quot;&gt;@nikomatsakis&lt;/a&gt; is rotating out and &lt;a href&#x3D;&quot;https://github.com/lcnr&quot;&gt;@lcnr&lt;/a&gt; is joining to co-lead alongside &lt;a href&#x3D;&quot;https://github.com/jackh726/&quot;&gt;@jackh726&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#roadmap-progress-and-major-milestones&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;roadmap-progress-and-major-milestones&quot;&gt;&lt;/a&gt;Roadmap progress and major milestones&lt;/h2&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#the-next-generation-trait-solver&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;the-next-generation-trait-solver&quot;&gt;&lt;/a&gt;The next-generation trait solver&lt;/h3&gt;
+&lt;p&gt;There has been &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/pulls?q&#x3D;is%3Apr+label%3AWG-trait-system-refactor+-label%3Arollup+is%3Amerged+closed%3A%3E2023-01-20+sort%3Acreated-asc+&quot;&gt;a lot of work&lt;/a&gt; on the &lt;a href&#x3D;&quot;https://github.com/rust-lang/trait-system-refactor-initiative/&quot;&gt;next-generation trait solver&lt;/a&gt;.
+The initiative posted &lt;a href&#x3D;&quot;https://blog.rust-lang.org/inside-rust/2023/12/22/trait-system-refactor-initiative.html&quot;&gt;a separate update&lt;/a&gt; at the end of last year. While
+we would have liked to &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/pull/121848&quot;&gt;stabilize its use in coherence&lt;/a&gt; a few months ago,
+this surfaced additional small behavior regressions and hangs, causing delays. We are working on fixing these issues and intend to merge the stabilization PR soon. We are getting close to compiling the standard library
+and the compiler with the new solver enabled everywhere, after which will be able to run
+crater to figure out the remaining issues. We expect there to be a long tail of minor issues
+and behavioral differences from the existing implementation, so there&#x27;s still a lot to do
+here. There are also open design questions which we will have to resolve before stabilizing
+the new implementation.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#async-and-impl-trait&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;async-and-impl-trait&quot;&gt;&lt;/a&gt;Async and &lt;code&gt;impl Trait&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;We stabilized &lt;code&gt;async&lt;/code&gt;-fn in traits (AFIT) and return-position &lt;code&gt;impl Trait&lt;/code&gt; in
+traits (RPITIT) in version 1.75 thanks to a significant effort by &lt;a href&#x3D;&quot;https://github.com/compiler-errors&quot;&gt;@compiler-errors&lt;/a&gt; and
+&lt;a href&#x3D;&quot;https://github.com/spastorino&quot;&gt;@spastorino&lt;/a&gt;. &lt;a href&#x3D;&quot;https://github.com/cjgillot&quot;&gt;@cjgillot&lt;/a&gt; greatly improved the way generators, and therefore async functions,
+are represented in the type system&lt;sup class&#x3D;&quot;footnote-ref&quot;&gt;&lt;a href&#x3D;&quot;#fn-107421&quot; id&#x3D;&quot;fnref-107421&quot; data-footnote-ref&gt;1&lt;/a&gt;&lt;/sup&gt;. This allowed us to support recursive
+&lt;code&gt;async&lt;/code&gt;-functions without too much additional work&lt;sup class&#x3D;&quot;footnote-ref&quot;&gt;&lt;a href&#x3D;&quot;#fn-117703&quot; id&#x3D;&quot;fnref-117703&quot; data-footnote-ref&gt;2&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;p&gt;Designing the next-generation trait solver surfaced issues and future-compatibility challenges
+of our type-alias &lt;code&gt;impl Trait&lt;/code&gt; (TAIT) implementation using the old trait solver. We are
+currently reworking the design and implementation. &lt;a href&#x3D;&quot;https://github.com/oli-obk&quot;&gt;@oli-obk&lt;/a&gt; is spear-heading this effort.
+This also impacts RPIT edge-cases, forcing us to be careful to avoid accidental breakage.
+There are some open language design questions for TAIT, so we plan to
+stabilize associated type position &lt;code&gt;impl Trait&lt;/code&gt; (ATPIT) as it avoids these language design
+questions while still closing the expressiveness gap.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#a-mir-formality&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;a-mir-formality&quot;&gt;&lt;/a&gt;&lt;code&gt;a-mir-formality&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;We made limited progress on &lt;a href&#x3D;&quot;https://github.com/rust-lang/a-mir-formality&quot;&gt;&lt;code&gt;a-mir-formality&lt;/code&gt;&lt;/a&gt; over the last year, mostly
+because we were able to allocate less time than expected towards this work.
+We have used it as the foundation towards an intuitive approach to
+coinductive traits which are necessary for many of the remaining unsound
+issues.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#fixing-soundness-issues&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;fixing-soundness-issues&quot;&gt;&lt;/a&gt;Fixing soundness issues&lt;/h3&gt;
+&lt;p&gt;We fixed multiple long-standing unsound issues, see &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues?q&#x3D;is%3Aissue+label%3AI-unsound+label%3AT-types+-label%3Arequires-nightly+is%3Aclosed+closed%3A%3C2024-06-20+&quot;&gt;the full list of closed issues&lt;/a&gt;. The most most notable of which was &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/80176&quot;&gt;#80176&lt;/a&gt;. This subtle issue caused us to accept methods in trait implementations whose function signature had outlives requirements not present in the trait definition. These requirements were then never proven when calling the trait method. As there were some crates which relied on this pattern by accident, even if it their usages didn&#x27;t exploit this unsoundness, we first merged a &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/105572&quot;&gt;future-compatibility lint&lt;/a&gt; which we then moved to a hard error after a few versions.&lt;/p&gt;
+&lt;p&gt;We&#x27;ve also spent time on &lt;a href&#x3D;&quot;https://github.com/orgs/rust-lang/projects/44/views/1&quot;&gt;categorizing the remaining open issues&lt;/a&gt; and integrating
+them into our longterm planning. Most of the remaining ones are blocked on the
+next-generation trait solver as fixing them relies on coinductive trait semantics
+and improvements to implied bounds. There are some remaining issues which can be at
+least partially fixed right now, and we intend to work through them as we go.
+Finally, there are some issues for which we still haven&#x27;t figured out the best
+approach and which require some further considerations.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#going-forward&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;going-forward&quot;&gt;&lt;/a&gt;Going forward&lt;/h2&gt;
+&lt;p&gt;We made significant progress during the last year but we are not done! This section covers our goals for the rest of 2024. For each item we also link to the project goals that we have proposed as part of the Rust Project&#x27;s &lt;a href&#x3D;&quot;https://blog.rust-lang.org/inside-rust/2024/05/07/announcing-project-goals.html&quot;&gt;experimental new roadmap process&lt;/a&gt;.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#-znext-solver&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;-znext-solver&quot;&gt;&lt;/a&gt;&lt;code&gt;-Znext-solver&lt;/code&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://rust-lang.github.io/rust-project-goals/2024h2/next-solver.html&quot;&gt;Next-generation trait solver project goal&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Our biggest goal is to use the &lt;a href&#x3D;&quot;https://github.com/rust-lang/trait-system-refactor-initiative/&quot;&gt;next-generation trait solver&lt;/a&gt;
+everywhere by default and to fully replace the existing implementation. We are currently
+finalizing the stabilization of &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/pull/121848&quot;&gt;its use in coherence checking&lt;/a&gt;. This should
+already fix multiple unsound issues and fix a lot of smaller issues and inconsistencies of
+the current implementation. See the stabilization report for more details.&lt;/p&gt;
+&lt;p&gt;We are also working on extracting its implementation into a separate library
+outside of the compiler itself. We would like to share the trait solver with
+rust-analyzer by the end of this year. They currently use &lt;a href&#x3D;&quot;https://github.com/rust-lang/chalk/&quot;&gt;chalk&lt;/a&gt; which is no longer
+actively maintained. Using the next-generation trait solver in rust-analyzer
+should result in a lot of additional testing for the solver while also improving
+the IDE experience by positively impacting performance and correctness.&lt;/p&gt;
+&lt;p&gt;We intend to slowly roll out the solver in other areas of the compiler until we&#x27;re able
+to fully remove the existing implementation by the end of 2025. This switch will fix
+multiple unsound issues by itself and will unblock a significant amount of future work.
+It will generally cleanup many rough edges of the type system, such as associated types
+in higher-ranked types. There are many unsound issues which can only be fixed once we exclusively
+use the new implementation.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#a-mir-formality-1&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;a-mir-formality-1&quot;&gt;&lt;/a&gt;&lt;code&gt;a-mir-formality&lt;/code&gt;&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://rust-lang.github.io/rust-project-goals/2024h2/a-mir-formality.html&quot;&gt;&lt;code&gt;a-mir-formality&lt;/code&gt; project goal&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We intend to more actively develop &lt;code&gt;a-mir-formality&lt;/code&gt; this year to use it in our design process.
+Using it to model parts of the type system has already been incredibly impactful and we want
+to build on that. We are working on more effective testing of &lt;code&gt;a-mir-formality&lt;/code&gt; by enabling its
+use for actual Rust code snippets and by adding fuzzing support. This will allow us to gain
+additional confidence in our model of the type system and will guide its future development.&lt;/p&gt;
+&lt;p&gt;We plan to fully formalize some components of the type system this year. Coherence is fairly
+self-contained, very subtle, and soundness-critical. This has prevented us from making significant
+improvements to it in the past. We also intend to formalize coinductive trait semantics, which are
+difficult to reason about and necessary to fix many longstanding soundness issues.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#language-changes-and-polonius&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;language-changes-and-polonius&quot;&gt;&lt;/a&gt;Language changes and polonius&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://rust-lang.github.io/rust-project-goals/2024h2/ATPIT.html&quot;&gt;Associated Type Position Impl Trait (ATPIT) project goal&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://rust-lang.github.io/rust-project-goals/2024h2/Polonius.html&quot;&gt;Polonius on Nightly project goal&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We intend to get the internal implementation of opaque types ready for the stabilization
+of TAIT and ATPIT this year. We are also hoping to land significant improvements to our
+handling of associated types in coherence checking this year.&lt;/p&gt;
+&lt;p&gt;Our other goal is to get &lt;a href&#x3D;&quot;https://blog.rust-lang.org/inside-rust/2023/10/06/polonius-update.html&quot;&gt;Polonius&lt;/a&gt;, the next generation borrow checker, available on nightly, which would put us in a position to stabilize in 2025 once we have time to do more optimization and testing.&lt;/p&gt;
+&lt;p&gt;We also intend to support the development of other language features, such as &lt;code&gt;async&lt;/code&gt;-closures, which are part of the &lt;a href&#x3D;&quot;https://rust-lang.github.io/rust-project-goals/2024h2/async.html&quot;&gt;async project goal&lt;/a&gt;,
+and &lt;code&gt;dyn&lt;/code&gt;-trait upcasting, which will hopefully get stabilized in the near future.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#roadmap&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;roadmap&quot;&gt;&lt;/a&gt;Roadmap&lt;/h2&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#eoy-2024&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;eoy-2024&quot;&gt;&lt;/a&gt;EOY 2024&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;next-generation trait solver
+&lt;ul&gt;
+&lt;li&gt;stable in coherence&lt;/li&gt;
+&lt;li&gt;used by rust-analyzer&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;ATPIT stabilized&lt;/li&gt;
+&lt;li&gt;a-mir-formality
+&lt;ul&gt;
+&lt;li&gt;support for fuzzing and testing Rust snippets&lt;/li&gt;
+&lt;li&gt;complete model of coherence and coinductive trait semantics&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;full polonius implementation available on nightly&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#eoy-2025&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;eoy-2025&quot;&gt;&lt;/a&gt;EOY 2025&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;next-generation trait solver used everywhere by default&lt;/li&gt;
+&lt;li&gt;TAIT stabilized&lt;/li&gt;
+&lt;li&gt;polonius stabilized&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#eoy-2027&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;eoy-2027&quot;&gt;&lt;/a&gt;EOY 2027&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;next-generation trait solver
+&lt;ul&gt;
+&lt;li&gt;support for coinduction and (implicit) where-bounds on &lt;code&gt;for&amp;lt;&#x27;a&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;enable perfect derive&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;a-mir-formality fully model soundness critical parts of Rust&lt;/li&gt;
+&lt;li&gt;all known type system unsoundnesses fixed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;section class&#x3D;&quot;footnotes&quot; data-footnotes&gt;
+&lt;ol&gt;
+&lt;li id&#x3D;&quot;fn-107421&quot;&gt;
+&lt;p&gt;stabilized in &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/107421&quot;&gt;https://github.com/rust-lang/rust/issues/107421&lt;/a&gt; &lt;a href&#x3D;&quot;#fnref-107421&quot; class&#x3D;&quot;footnote-backref&quot; data-footnote-backref data-footnote-backref-idx&#x3D;&quot;1&quot; aria-label&#x3D;&quot;Back to reference 1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id&#x3D;&quot;fn-117703&quot;&gt;
+&lt;p&gt;stabilized in &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/117703&quot;&gt;https://github.com/rust-lang/rust/issues/117703&lt;/a&gt; &lt;a href&#x3D;&quot;#fnref-117703&quot; class&#x3D;&quot;footnote-backref&quot; data-footnote-backref data-footnote-backref-idx&#x3D;&quot;2&quot; aria-label&#x3D;&quot;Back to reference 2&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</content>
+
+        <author>
+            <name>lcnr</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Announcing Rust 1.79.0</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.html" type="text/html" title="Announcing Rust 1.79.0" />
+        <published>2024-06-13T00:00:00+00:00</published>
+        <updated>2024-06-13T00:00:00+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.html">&lt;p&gt;The Rust team is happy to announce a new version of Rust, 1.79.0. Rust is a programming language empowering everyone to build reliable and efficient software.&lt;/p&gt;
+&lt;p&gt;If you have a previous version of Rust installed via &lt;code&gt;rustup&lt;/code&gt;, you can get 1.79.0 with:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-console&quot;&gt;$ rustup update stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you don&#x27;t have it already, you can &lt;a href&#x3D;&quot;https://www.rust-lang.org/install.html&quot;&gt;get &lt;code&gt;rustup&lt;/code&gt;&lt;/a&gt; from the appropriate page on our website, and check out the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/releases.html#version-1790-2024-06-13&quot;&gt;detailed release notes for 1.79.0&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you&#x27;d like to help us out by testing future releases, you might consider updating locally to use the beta channel (&lt;code&gt;rustup default beta&lt;/code&gt;) or the nightly channel (&lt;code&gt;rustup default nightly&lt;/code&gt;). Please &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/new/choose&quot;&gt;report&lt;/a&gt; any bugs you might come across!&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#whats-in-1790-stable&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;whats-in-1790-stable&quot;&gt;&lt;/a&gt;What&#x27;s in 1.79.0 stable&lt;/h2&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#inline-const-expressions&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;inline-const-expressions&quot;&gt;&lt;/a&gt;Inline &lt;code&gt;const&lt;/code&gt; expressions&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;const { ... }&lt;/code&gt; blocks are now stable in expression position, permitting
+explicitly entering a const context without requiring extra declarations (e.g.,
+defining &lt;code&gt;const&lt;/code&gt; items or associated constants on a trait).&lt;/p&gt;
+&lt;p&gt;Unlike const items (&lt;code&gt;const ITEM: ... &#x3D; ...&lt;/code&gt;), inline consts are able to make
+use of in-scope generics, and have their type inferred rather than written explicitly, making them particularly useful for inline code snippets. For example, a pattern like:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;const EMPTY: Option&amp;lt;Vec&amp;lt;u8&amp;gt;&amp;gt; &#x3D; None;
+let foo &#x3D; [EMPTY; 100];
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;can now be written like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;let foo &#x3D; [const { None }; 100];
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Notably, this is also true of generic contexts, where previously a verbose trait declaration with an associated constant would be required:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;fn create_none_array&amp;lt;T, const N: usize&amp;gt;() -&amp;gt; [Option&amp;lt;T&amp;gt;; N] {
+    [const { None::&amp;lt;T&amp;gt; }; N]
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This makes this code much more succinct and easier to read.&lt;/p&gt;
+&lt;p&gt;See the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/reference/expressions/block-expr.html#const-blocks&quot;&gt;reference documentation&lt;/a&gt; for details.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#bounds-in-associated-type-position&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;bounds-in-associated-type-position&quot;&gt;&lt;/a&gt;Bounds in associated type position&lt;/h3&gt;
+&lt;p&gt;Rust 1.79 stabilizes the associated item bounds syntax, which allows us to put
+bounds in associated type position within other bounds, i.e.
+&lt;code&gt;T: Trait&amp;lt;Assoc: Bounds...&amp;gt;&lt;/code&gt;. This avoids the need to provide an extra,
+explicit generic type just to constrain the associated type.&lt;/p&gt;
+&lt;p&gt;This feature allows specifying bounds in a few places that previously either
+were not possible or imposed extra, unnecessary constraints on usage:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;where&lt;/code&gt; clauses&lt;/strong&gt; - in this position, this is equivalent to breaking up the bound into two (or more) &lt;code&gt;where&lt;/code&gt; clauses. For example, &lt;code&gt;where T: Trait&amp;lt;Assoc: Bound&amp;gt;&lt;/code&gt; is equivalent to &lt;code&gt;where T: Trait, &amp;lt;T as Trait&amp;gt;::Assoc: Bound&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Supertraits&lt;/strong&gt; - a bound specified via the new syntax is implied when the trait is used, unlike where clauses. Sample syntax: &lt;code&gt;trait CopyIterator: Iterator&amp;lt;Item: Copy&amp;gt; {}&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Associated type item bounds&lt;/strong&gt; - This allows constraining the &lt;em&gt;nested&lt;/em&gt; rigid projections that are associated with a trait&#x27;s associated types. e.g. &lt;code&gt;trait Trait { type Assoc: Trait2&amp;lt;Assoc2: Copy&amp;gt;; }&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;opaque type bounds (RPIT, TAIT)&lt;/strong&gt; - This allows constraining associated types that are associated with the opaque type without having to &lt;em&gt;name&lt;/em&gt; the opaque type. For example, &lt;code&gt;impl Iterator&amp;lt;Item: Copy&amp;gt;&lt;/code&gt; defines an iterator whose item is &lt;code&gt;Copy&lt;/code&gt; without having to actually name that item bound.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;See &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/pull/122055/#issue-2170532454&quot;&gt;the stabilization report&lt;/a&gt; for more details.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#extending-automatic-temporary-lifetime-extension&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;extending-automatic-temporary-lifetime-extension&quot;&gt;&lt;/a&gt;Extending automatic temporary lifetime extension&lt;/h3&gt;
+&lt;p&gt;Temporaries which are immediately referenced in construction are now
+automatically lifetime extended in &lt;code&gt;match&lt;/code&gt; and &lt;code&gt;if&lt;/code&gt; constructs. This has the
+same behavior as lifetime extension for temporaries in block constructs.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;let a &#x3D; if true {
+    ..;
+    &amp;amp;temp() // used to error, but now gets lifetime extended
+} else {
+    ..;
+    &amp;amp;temp() // used to error, but now gets lifetime extended
+};
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;and&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;let a &#x3D; match () {
+    _ &#x3D;&amp;gt; {
+        ..;
+        &amp;amp;temp() // used to error, but now gets lifetime extended
+    }
+};
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;are now consistent with prior behavior:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;let a &#x3D; {
+    ..;
+    &amp;amp;temp() // lifetime is extended
+};
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This behavior is backwards compatible since these programs used to fail compilation.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#frame-pointers-enabled-in-standard-library-builds&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;frame-pointers-enabled-in-standard-library-builds&quot;&gt;&lt;/a&gt;Frame pointers enabled in standard library builds&lt;/h3&gt;
+&lt;p&gt;The standard library distributed by the Rust project is now compiled with
+&lt;code&gt;-Cforce-frame-pointers&#x3D;yes&lt;/code&gt;, enabling downstream users to more easily profile
+their programs. Note that the standard library also continues to come up with
+line-level debug info (e.g., DWARF), though that is &lt;a href&#x3D;&quot;https://blog.rust-lang.org/2024/03/21/Rust-1.77.0.html#enable-strip-in-release-profiles-by-default&quot;&gt;stripped by default&lt;/a&gt; in Cargo&#x27;s release profiles.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#stabilized-apis&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;stabilized-apis&quot;&gt;&lt;/a&gt;Stabilized APIs&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.i32.html#method.unchecked_add&quot;&gt;&lt;code&gt;{integer}::unchecked_add&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.i32.html#method.unchecked_mul&quot;&gt;&lt;code&gt;{integer}::unchecked_mul&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.i32.html#method.unchecked_sub&quot;&gt;&lt;code&gt;{integer}::unchecked_sub&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.slice.html#method.split_at_unchecked&quot;&gt;&lt;code&gt;&amp;lt;[T]&amp;gt;::split_at_unchecked&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.slice.html#method.split_at_mut_unchecked&quot;&gt;&lt;code&gt;&amp;lt;[T]&amp;gt;::split_at_mut_unchecked&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.slice.html#method.utf8_chunks&quot;&gt;&lt;code&gt;&amp;lt;[u8]&amp;gt;::utf8_chunks&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/str/struct.Utf8Chunks.html&quot;&gt;&lt;code&gt;str::Utf8Chunks&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/str/struct.Utf8Chunk.html&quot;&gt;&lt;code&gt;str::Utf8Chunk&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.pointer.html#method.is_aligned&quot;&gt;&lt;code&gt;&amp;lt;*const T&amp;gt;::is_aligned&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.pointer.html#method.is_aligned-1&quot;&gt;&lt;code&gt;&amp;lt;*mut T&amp;gt;::is_aligned&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/ptr/struct.NonNull.html#method.is_aligned&quot;&gt;&lt;code&gt;NonNull::is_aligned&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.pointer.html#method.len&quot;&gt;&lt;code&gt;&amp;lt;*const [T]&amp;gt;::len&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.pointer.html#method.len-1&quot;&gt;&lt;code&gt;&amp;lt;*mut [T]&amp;gt;::len&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.pointer.html#method.is_empty&quot;&gt;&lt;code&gt;&amp;lt;*const [T]&amp;gt;::is_empty&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/primitive.pointer.html#method.is_empty-1&quot;&gt;&lt;code&gt;&amp;lt;*mut [T]&amp;gt;::is_empty&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/ptr/struct.NonNull.html#method.is_empty&quot;&gt;&lt;code&gt;NonNull::&amp;lt;[T]&amp;gt;::is_empty&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/ffi/c_str/struct.CStr.html#method.count_bytes&quot;&gt;&lt;code&gt;CStr::count_bytes&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/struct.Error.html#method.downcast&quot;&gt;&lt;code&gt;io::Error::downcast&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/num/struct.NonZero.html&quot;&gt;&lt;code&gt;num::NonZero&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/path/fn.absolute.html&quot;&gt;&lt;code&gt;path::absolute&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/proc_macro/struct.Literal.html#method.byte_character&quot;&gt;&lt;code&gt;proc_macro::Literal::byte_character&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/proc_macro/struct.Literal.html#method.c_string&quot;&gt;&lt;code&gt;proc_macro::Literal::c_string&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;These APIs are now stable in const contexts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/core/sync/atomic/struct.AtomicUsize.html#method.into_inner&quot;&gt;&lt;code&gt;Atomic*::into_inner&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/struct.Cursor.html#method.new&quot;&gt;&lt;code&gt;io::Cursor::new&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/struct.Cursor.html#method.get_ref&quot;&gt;&lt;code&gt;io::Cursor::get_ref&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/struct.Cursor.html#method.position&quot;&gt;&lt;code&gt;io::Cursor::position&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/fn.empty.html&quot;&gt;&lt;code&gt;io::empty&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/fn.repeat.html&quot;&gt;&lt;code&gt;io::repeat&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/fn.sink.html&quot;&gt;&lt;code&gt;io::sink&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/panic/struct.Location.html#method.caller&quot;&gt;&lt;code&gt;panic::Location::caller&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/panic/struct.Location.html#method.file&quot;&gt;&lt;code&gt;panic::Location::file&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/panic/struct.Location.html#method.line&quot;&gt;&lt;code&gt;panic::Location::line&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/panic/struct.Location.html#method.column&quot;&gt;&lt;code&gt;panic::Location::column&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#other-changes&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;other-changes&quot;&gt;&lt;/a&gt;Other changes&lt;/h3&gt;
+&lt;p&gt;Check out everything that changed in &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/releases/tag/1.79.0&quot;&gt;Rust&lt;/a&gt;, &lt;a href&#x3D;&quot;https://github.com/rust-lang/cargo/blob/master/CHANGELOG.md#cargo-179-2024-06-13&quot;&gt;Cargo&lt;/a&gt;, and &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust-clippy/blob/master/CHANGELOG.md#rust-179&quot;&gt;Clippy&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#contributors-to-1790&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;contributors-to-1790&quot;&gt;&lt;/a&gt;Contributors to 1.79.0&lt;/h2&gt;
+&lt;p&gt;Many people came together to create Rust 1.79.0. We couldn&#x27;t have done it without all of you. &lt;a href&#x3D;&quot;https://thanks.rust-lang.org/rust/1.79.0/&quot;&gt;Thanks!&lt;/a&gt;&lt;/p&gt;
+</content>
+
+        <author>
+            <name>The Rust Release Team</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Faster linking times on nightly on Linux using &#x60;rust-lld&#x60;</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/05/17/enabling-rust-lld-on-linux.html" type="text/html" title="Faster linking times on nightly on Linux using &#x60;rust-lld&#x60;" />
+        <published>2024-05-17T00:00:00+00:00</published>
+        <updated>2024-05-17T00:00:00+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/05/17/enabling-rust-lld-on-linux.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/05/17/enabling-rust-lld-on-linux.html">&lt;p&gt;TL;DR: rustc will use &lt;code&gt;rust-lld&lt;/code&gt; by default on &lt;code&gt;x86_64-unknown-linux-gnu&lt;/code&gt; on nightly to
+significantly reduce linking times.&lt;/p&gt;
+&lt;h4&gt;&lt;a href&#x3D;&quot;#some-context&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;some-context&quot;&gt;&lt;/a&gt;Some context&lt;/h4&gt;
+&lt;p&gt;Linking time is often a big part of compilation time. When rustc needs to build a binary or a shared
+library, it will usually call the default linker installed on the system to do that (this can be
+changed on the command-line or by the target for which the code is compiled).&lt;/p&gt;
+&lt;p&gt;The linkers do an important job, with concerns about stability, backwards-compatibility and so on.
+For these and other reasons, on the most popular operating systems they usually are older programs,
+designed when computers only had a single core. So, they usually tend to be slow on a modern
+machine. For example, when building ripgrep 13 in debug mode on Linux, roughly half of the time is
+actually spent in the linker.&lt;/p&gt;
+&lt;p&gt;There are different linkers, however, and the usual advice to improve linking times is to use one of
+these newer and faster linkers, like LLVM&#x27;s &lt;a href&#x3D;&quot;https://lld.llvm.org/&quot;&gt;&lt;code&gt;lld&lt;/code&gt;&lt;/a&gt; or Rui Ueyama&#x27;s
+&lt;a href&#x3D;&quot;https://github.com/rui314/mold&quot;&gt;&lt;code&gt;mold&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Some of Rust&#x27;s wasm and aarch64 targets already use &lt;code&gt;lld&lt;/code&gt; by default. When using rustup, rustc ships
+with a version of &lt;code&gt;lld&lt;/code&gt; for this purpose. When CI builds LLVM to use in the compiler, it also builds
+the linker and packages it. It&#x27;s referred to as &lt;code&gt;rust-lld&lt;/code&gt; to avoid colliding with any &lt;code&gt;lld&lt;/code&gt; already
+installed on the user&#x27;s machine.&lt;/p&gt;
+&lt;p&gt;Since improvements to linking times are substantial, it would be a good default to use in the most
+popular targets. This has been discussed for a long time, for example in issues
+&lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/39915&quot;&gt;#39915&lt;/a&gt; and
+&lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/71515&quot;&gt;#71515&lt;/a&gt;, and rustc already offers nightly flags to
+use &lt;code&gt;rust-lld&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;By now, we believe we&#x27;ve done all the internal testing that we could, on CI, crater, and our
+benchmarking infrastructure. We would now like to expand testing and gather real-world feedback and
+use-cases. Therefore, we will enable &lt;code&gt;rust-lld&lt;/code&gt; to be the linker used by default on
+&lt;code&gt;x86_64-unknown-linux-gnu&lt;/code&gt; for nightly builds.&lt;/p&gt;
+&lt;h4&gt;&lt;a href&#x3D;&quot;#benefits&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;benefits&quot;&gt;&lt;/a&gt;Benefits&lt;/h4&gt;
+&lt;p&gt;While this also enables the compiler to use more linker features in the future, the most immediate
+benefit is much improved linking times.&lt;/p&gt;
+&lt;p&gt;Here are more details from the ripgrep example mentioned above: linking is reduced 7x, resulting in
+a 40% reduction in end-to-end compilation times.&lt;/p&gt;
+&lt;p&gt;&lt;img src&#x3D;&quot;../../../../images/2024-05-17-enabling-rust-lld-on-linux/ripgrep-comparison.png&quot; alt&#x3D;&quot;Before/after comparison of a ripgrep debug build&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Most binaries should see some improvements here, but it&#x27;s especially significant with e.g. bigger
+binaries, or when involving debuginfo. These usually see bottlenecks in the linker.&lt;/p&gt;
+&lt;p&gt;Here&#x27;s &lt;a href&#x3D;&quot;https://perf.rust-lang.org/compare.html?start&#x3D;b3e117044c7f707293edc040edb93e7ec5f7040a&amp;amp;end&#x3D;baed03c51a68376c1789cc373581eea0daf89967&amp;amp;stat&#x3D;instructions%3Au&amp;amp;tab&#x3D;compile&quot;&gt;a
+link&lt;/a&gt;
+to the complete results from our benchmarks.&lt;/p&gt;
+&lt;p&gt;If testing goes well, we can then stabilize using this faster linker by default for
+&lt;code&gt;x86_64-unknown-linux-gnu&lt;/code&gt; users, before maybe looking at other targets.&lt;/p&gt;
+&lt;h4&gt;&lt;a href&#x3D;&quot;#possible-drawbacks&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;possible-drawbacks&quot;&gt;&lt;/a&gt;Possible drawbacks&lt;/h4&gt;
+&lt;p&gt;From our prior testing, we don&#x27;t really expect issues to happen in practice. It is a drop-in
+replacement for the vast majority of cases, but &lt;code&gt;lld&lt;/code&gt; is not &lt;em&gt;bug-for-bug&lt;/em&gt; compatible with GNU ld.&lt;/p&gt;
+&lt;p&gt;In any case, using &lt;code&gt;rust-lld&lt;/code&gt; can be disabled if any problem occurs: use the &lt;code&gt;-Z linker-features&#x3D;-lld&lt;/code&gt; flag to revert to using the system&#x27;s default linker.&lt;/p&gt;
+&lt;p&gt;Some crates somehow relying on these differences could need additional link args. For example, we
+saw &amp;lt;20 crates in the crater run failing to link because of a different default about &lt;a href&#x3D;&quot;https://lld.llvm.org/ELF/start-stop-gc&quot;&gt;encapsulation
+symbols&lt;/a&gt;: these could require
+&lt;code&gt;-Clink-arg&#x3D;-Wl,-z,nostart-stop-gc&lt;/code&gt; to match the legacy GNU ld behavior.&lt;/p&gt;
+&lt;p&gt;Some of the big gains in performance come from parallelism, which could be undesirable in
+resource-constrained environments.&lt;/p&gt;
+&lt;h4&gt;&lt;a href&#x3D;&quot;#summary&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;summary&quot;&gt;&lt;/a&gt;Summary&lt;/h4&gt;
+&lt;p&gt;rustc will use &lt;code&gt;rust-lld&lt;/code&gt; on &lt;code&gt;x86_64-unknown-linux-gnu&lt;/code&gt; nightlies, for much improved linking times,
+starting in tomorrow&#x27;s rustup nightly (&lt;code&gt;nightly-2024-05-18&lt;/code&gt;).
+Let us know if you encounter problems, by &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/new/choose&quot;&gt;opening an
+issue&lt;/a&gt; on GitHub.&lt;/p&gt;
+&lt;p&gt;If that happens, you can revert to the default linker with the &lt;code&gt;-Z linker-features&#x3D;-lld&lt;/code&gt; flag.
+Either by adding it to the usual &lt;code&gt;RUSTFLAGS&lt;/code&gt; environment variable, or to a project&#x27;s
+&lt;a href&#x3D;&quot;https://doc.rust-lang.org/cargo/reference/config.html&quot;&gt;&lt;code&gt;.cargo/config.toml&lt;/code&gt;&lt;/a&gt; configuration file,
+like so:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-toml&quot;&gt;[target.x86_64-unknown-linux-gnu]
+rustflags &#x3D; [&amp;quot;-Zlinker-features&#x3D;-lld&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+
+        <author>
+            <name>Rémy Rakic</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Rust participates in OSPP 2024</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/05/07/OSPP-2024.html" type="text/html" title="Rust participates in OSPP 2024" />
+        <published>2024-05-07T00:00:00+00:00</published>
+        <updated>2024-05-07T00:00:00+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/05/07/OSPP-2024.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/05/07/OSPP-2024.html">&lt;p&gt;Similar to our &lt;a href&#x3D;&quot;https://blog.rust-lang.org/2024/02/21/Rust-participates-in-GSoC-2024.html&quot;&gt;previous&lt;/a&gt; &lt;a href&#x3D;&quot;https://blog.rust-lang.org/2024/05/01/gsoc-2024-selected-projects.html&quot;&gt;announcements&lt;/a&gt; of the Rust Project&#x27;s participation in Google Summer of Code (GSoC), we are now announcing our participation in &lt;a href&#x3D;&quot;https://summer-ospp.ac.cn/&quot;&gt;Open Source Promotion Plan (OSPP) 2024&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;OSPP is a program organized in large part by The Institute of Software Chinese Academy of Sciences. Its goal is to encourage college students to participate in developing and maintaining open source software. The Rust Project is &lt;a href&#x3D;&quot;https://summer-ospp.ac.cn/org/orgdetail/11769be7-d00a-4931-be95-13595ac181e4?lang&#x3D;en&quot;&gt;already registered&lt;/a&gt; and has a number of projects available for mentorship:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://summer-ospp.ac.cn/org/prodetail/241170274&quot;&gt;C codegen backend for rustc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://summer-ospp.ac.cn/org/prodetail/241170275&quot;&gt;Extend annotate-snippets with features required by rustc&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://summer-ospp.ac.cn/org/prodetail/241170277&quot;&gt;Improve bootstrap&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://summer-ospp.ac.cn/org/prodetail/241170528&quot;&gt;Modernize the libc crate&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://summer-ospp.ac.cn/org/prodetail/241170529&quot;&gt;Improve infrastructure automation tools&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Eligibility is limited to students and there is a &lt;a href&#x3D;&quot;https://summer-ospp.ac.cn/help/en/student/&quot;&gt;guide&lt;/a&gt; for potential participants. Student registration ends on the 3rd of June with the project application deadline a day later.&lt;/p&gt;
+&lt;p&gt;Unlike GSoC which allows students to propose their own projects, OSPP requires that students only apply for one of the registered projects. We do have an &lt;a href&#x3D;&quot;https://rust-lang.zulipchat.com/#narrow/stream/436418-ospp&quot;&gt;#ospp&lt;/a&gt; Zulip stream and potential contributors are encouraged to join and discuss details about the projects and connect with mentors.&lt;/p&gt;
+&lt;p&gt;After the project application window closes on June 4th, we will review and select participants, which will be announced on June 26th. From there, students will participate through to the end of September.&lt;/p&gt;
+&lt;p&gt;As with GSoC, this is our first year participating in this program. We are incredibly excited for this opportunity to further expand into new open source communities and we&#x27;re hopeful for a productive and educational summer.&lt;/p&gt;
+</content>
+
+        <author>
+            <name>Amanieu d&#x27;Antras, Jack Huey, and Jakub Beránek</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Automatic checking of cfgs at compile-time</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/05/06/check-cfg.html" type="text/html" title="Automatic checking of cfgs at compile-time" />
+        <published>2024-05-06T00:00:00+00:00</published>
+        <updated>2024-05-06T00:00:00+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/05/06/check-cfg.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/05/06/check-cfg.html">&lt;p&gt;The Cargo and Compiler team are delighted to announce that starting with Rust 1.80 (or nightly-2024-05-05) every &lt;em&gt;reachable&lt;/em&gt; &lt;code&gt;#[cfg]&lt;/code&gt; will be &lt;strong&gt;automatically checked&lt;/strong&gt; that they match the &lt;strong&gt;expected config names and values&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;This can help with verifying that the crate is correctly handling conditional compilation for different target platforms or features. It ensures that the cfg settings are consistent between what is intended and what is used, helping to catch potential bugs or errors early in the development process.&lt;/p&gt;
+&lt;p&gt;This addresses a common pitfall for new and advanced users.&lt;/p&gt;
+&lt;p&gt;This is another step to our commitment to provide user-focused tooling and we are eager and excited to finally see it fixed, after more than two years since the original &lt;a href&#x3D;&quot;https://github.com/rust-lang/rfcs/pull/3013&quot;&gt;RFC 3013&lt;/a&gt;&lt;sup class&#x3D;&quot;footnote-ref&quot;&gt;&lt;a href&#x3D;&quot;#fn-1&quot; id&#x3D;&quot;fnref-1&quot; data-footnote-ref&gt;1&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#a-look-at-the-feature&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;a-look-at-the-feature&quot;&gt;&lt;/a&gt;A look at the feature&lt;/h2&gt;
+&lt;p&gt;Every time a Cargo feature is declared that feature is transformed into a config that is passed to &lt;code&gt;rustc&lt;/code&gt; (the Rust compiler) so it can verify with it along with &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/rustc/check-cfg.html#well-known-names-and-values&quot;&gt;well known cfgs&lt;/a&gt; if any of the &lt;code&gt;#[cfg]&lt;/code&gt;, &lt;code&gt;#![cfg_attr]&lt;/code&gt; and &lt;code&gt;cfg!&lt;/code&gt; have unexpected configs and report a warning with the &lt;code&gt;unexpected_cfgs&lt;/code&gt; lint.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;code&gt;Cargo.toml&lt;/code&gt;&lt;/em&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-toml&quot;&gt;[package]
+name &#x3D; &amp;quot;foo&amp;quot;
+
+[features]
+lasers &#x3D; []
+zapping &#x3D; []
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;&lt;code&gt;src/lib.rs&lt;/code&gt;:&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;#[cfg(feature &#x3D; &amp;quot;lasers&amp;quot;)]  // This condition is expected
+                            // as &amp;quot;lasers&amp;quot; is an expected value
+                            // of the &#x60;feature&#x60; cfg
+fn shoot_lasers() {}
+
+#[cfg(feature &#x3D; &amp;quot;monkeys&amp;quot;)] // This condition is UNEXPECTED
+                            // as &amp;quot;monkeys&amp;quot; is NOT an expected
+                            // value of the &#x60;feature&#x60; cfg
+fn write_shakespeare() {}
+
+#[cfg(windosw)]             // This condition is UNEXPECTED
+                            // it&#x27;s supposed to be &#x60;windows&#x60;
+fn win() {}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;&lt;code&gt;cargo check&lt;/code&gt;&lt;/em&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;img src&#x3D;&quot;../../../../images/2024-05-06-check-cfg/cargo-check.svg&quot; alt&#x3D;&quot;cargo-check&quot; /&gt;&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#expecting-custom-cfgs&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;expecting-custom-cfgs&quot;&gt;&lt;/a&gt;Expecting custom cfgs&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;UPDATE: This section was added with the release of nightly-2024-05-19.&lt;/em&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;In Cargo point-of-view: a custom cfg is one that is neither defined by &lt;code&gt;rustc&lt;/code&gt; nor by a Cargo feature. Think of &lt;code&gt;tokio_unstable&lt;/code&gt;, &lt;code&gt;has_foo&lt;/code&gt;, ... but not &lt;code&gt;feature &#x3D; &amp;quot;lasers&amp;quot;&lt;/code&gt;, &lt;code&gt;unix&lt;/code&gt; or &lt;code&gt;debug_assertions&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Some crates might use custom cfgs, like &lt;code&gt;loom&lt;/code&gt;, &lt;code&gt;fuzzing&lt;/code&gt; or &lt;code&gt;tokio_unstable&lt;/code&gt; that they expected from the environment (&lt;code&gt;RUSTFLAGS&lt;/code&gt; or other means) and which are always statically known at compile time. For those cases, Cargo provides via the &lt;code&gt;[lints]&lt;/code&gt; table a way to statically declare those cfgs as expected.&lt;/p&gt;
+&lt;p&gt;Defining those custom cfgs as expected is done through the special &lt;code&gt;check-cfg&lt;/code&gt; config under &lt;code&gt;[lints.rust.unexpected_cfgs]&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;code&gt;Cargo.toml&lt;/code&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-toml&quot;&gt;[lints.rust]
+unexpected_cfgs &#x3D; { level &#x3D; &amp;quot;warn&amp;quot;, check-cfg &#x3D; [&#x27;cfg(loom)&#x27;, &#x27;cfg(fuzzing)&#x27;] }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#custom-cfgs-in-build-scripts&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;custom-cfgs-in-build-scripts&quot;&gt;&lt;/a&gt;Custom cfgs in build scripts&lt;/h2&gt;
+&lt;p&gt;On the other hand some crates use custom cfgs that are enabled by some logic in the crate &lt;code&gt;build.rs&lt;/code&gt;. For those crates Cargo provides a new instruction: &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/cargo/reference/build-scripts.html#rustc-check-cfg&quot;&gt;&lt;code&gt;cargo::rustc-check-cfg&lt;/code&gt;&lt;/a&gt;&lt;sup class&#x3D;&quot;footnote-ref&quot;&gt;&lt;a href&#x3D;&quot;#fn-2&quot; id&#x3D;&quot;fnref-2&quot; data-footnote-ref&gt;2&lt;/a&gt;&lt;/sup&gt; (or &lt;code&gt;cargo:rustc-check-cfg&lt;/code&gt; for older Cargo version).&lt;/p&gt;
+&lt;p&gt;The syntax to use is described in the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/rustc/&quot;&gt;rustc book&lt;/a&gt; section &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/rustc/check-cfg.html&quot;&gt;checking configuration&lt;/a&gt;, but in a nutshell the basic syntax of &lt;code&gt;--check-cfg&lt;/code&gt; is:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cfg(name, values(&amp;quot;value1&amp;quot;, &amp;quot;value2&amp;quot;, ..., &amp;quot;valueN&amp;quot;))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that every custom cfgs must always be expected, regardless if the cfg is active or not!&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#buildrs-example&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;buildrs-example&quot;&gt;&lt;/a&gt;&lt;code&gt;build.rs&lt;/code&gt; example&lt;/h3&gt;
+&lt;p&gt;&lt;code&gt;build.rs&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;fn main() {
+    println!(&amp;quot;cargo::rustc-check-cfg&#x3D;cfg(has_foo)&amp;quot;);
+    //        ^^^^^^^^^^^^^^^^^^^^^^ new with Cargo 1.80
+    if has_foo() {
+        println!(&amp;quot;cargo::rustc-cfg&#x3D;has_foo&amp;quot;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Each &lt;code&gt;cargo::rustc-cfg&lt;/code&gt; should have an accompanying &lt;strong&gt;unconditional&lt;/strong&gt; &lt;code&gt;cargo::rustc-check-cfg&lt;/code&gt; directive to avoid warnings like this: &lt;code&gt;unexpected cfg condition name: has_foo&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#equivalence-table&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;equivalence-table&quot;&gt;&lt;/a&gt;Equivalence table&lt;/h3&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;code&gt;cargo::rustc-cfg&lt;/code&gt;&lt;/th&gt;
+&lt;th&gt;&lt;code&gt;cargo::rustc-check-cfg&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;foo&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;cfg(foo)&lt;/code&gt; or &lt;code&gt;cfg(foo, values(none()))&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;foo&#x3D;&amp;quot;&amp;quot;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;cfg(foo, values(&amp;quot;&amp;quot;))&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;foo&#x3D;&amp;quot;bar&amp;quot;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;cfg(foo, values(&amp;quot;bar&amp;quot;))&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;foo&#x3D;&amp;quot;1&amp;quot;&lt;/code&gt; and &lt;code&gt;foo&#x3D;&amp;quot;2&amp;quot;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;cfg(foo, values(&amp;quot;1&amp;quot;, &amp;quot;2&amp;quot;))&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;foo&#x3D;&amp;quot;1&amp;quot;&lt;/code&gt; and &lt;code&gt;bar&#x3D;&amp;quot;2&amp;quot;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;cfg(foo, values(&amp;quot;1&amp;quot;))&lt;/code&gt; and &lt;code&gt;cfg(bar, values(&amp;quot;2&amp;quot;))&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;foo&lt;/code&gt; and &lt;code&gt;foo&#x3D;&amp;quot;bar&amp;quot;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;cfg(foo, values(none(), &amp;quot;bar&amp;quot;))&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;More details can be found in the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/rustc/check-cfg.html&quot;&gt;&lt;code&gt;rustc&lt;/code&gt; book&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#frequently-asked-questions&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;frequently-asked-questions&quot;&gt;&lt;/a&gt;Frequently asked questions&lt;/h2&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#can-it-be-disabled&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;can-it-be-disabled&quot;&gt;&lt;/a&gt;Can it be disabled?&lt;/h3&gt;
+&lt;p&gt;For Cargo users, the feature is &lt;strong&gt;always on&lt;/strong&gt; and &lt;em&gt;cannot&lt;/em&gt; be disabled, but like any other lints it can be controlled: &lt;code&gt;#![warn(unexpected_cfgs)]&lt;/code&gt;.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#does-the-lint-affect-dependencies&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;does-the-lint-affect-dependencies&quot;&gt;&lt;/a&gt;Does the lint affect dependencies?&lt;/h3&gt;
+&lt;p&gt;No, like most lints, &lt;code&gt;unexpected_cfgs&lt;/code&gt; will only be reported for local packages thanks to &lt;a href&#x3D;&quot;https://doc.rust-lang.org/rustc/lints/levels.html#capping-lints&quot;&gt;cap-lints&lt;/a&gt;.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#how-does-it-interact-with-the-rustflags-env&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;how-does-it-interact-with-the-rustflags-env&quot;&gt;&lt;/a&gt;How does it interact with the &lt;code&gt;RUSTFLAGS&lt;/code&gt; env?&lt;/h3&gt;
+&lt;p&gt;You should be able to use the &lt;code&gt;RUSTFLAGS&lt;/code&gt; environment variable like it was before.
+&lt;em&gt;Currently &lt;code&gt;--cfg&lt;/code&gt; arguments are not checked, only usage in code are.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;This means that doing &lt;code&gt;RUSTFLAGS&#x3D;&amp;quot;--cfg tokio_unstable&amp;quot; cargo check&lt;/code&gt; will not report any warnings, unless &lt;code&gt;tokio_unstable&lt;/code&gt; is used within your local crates, in which case crate author will need to make sure that that custom cfg is expected with &lt;code&gt;cargo::rustc-check-cfg&lt;/code&gt; in the &lt;code&gt;build.rs&lt;/code&gt; of that crate.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#how-to-expect-custom-cfgs-without-a-buildrs&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;how-to-expect-custom-cfgs-without-a-buildrs&quot;&gt;&lt;/a&gt;How to expect custom cfgs without a &lt;code&gt;build.rs&lt;/code&gt;?&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;UPDATE: Cargo with nightly-2024-05-19 now provides the &lt;code&gt;[lints.rust.unexpected_cfgs.check-cfg]&lt;/code&gt; config to address the statically known custom cfgs.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;del&gt;There is &lt;strong&gt;currently no way&lt;/strong&gt; to expect a custom cfg other than with &lt;code&gt;cargo::rustc-check-cfg&lt;/code&gt; in a &lt;code&gt;build.rs&lt;/code&gt;.&lt;/del&gt;&lt;/p&gt;
+&lt;p&gt;Crate authors that don&#x27;t want to use a &lt;code&gt;build.rs&lt;/code&gt; and cannot use &lt;code&gt;[lints.rust.unexpected_cfgs.check-cfg]&lt;/code&gt;, are encouraged to use Cargo features instead.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#how-does-it-interact-with-other-build-systems&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;how-does-it-interact-with-other-build-systems&quot;&gt;&lt;/a&gt;How does it interact with other build systems?&lt;/h3&gt;
+&lt;p&gt;Non-Cargo based build systems are not affected by the lint by default. Build system authors that wish to have the same functionality should look at the &lt;code&gt;rustc&lt;/code&gt; documentation for the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/rustc/check-cfg.html&quot;&gt;&lt;code&gt;--check-cfg&lt;/code&gt;&lt;/a&gt; flag for a detailed explanation of how to achieve the same functionality.&lt;/p&gt;
+&lt;section class&#x3D;&quot;footnotes&quot; data-footnotes&gt;
+&lt;ol&gt;
+&lt;li id&#x3D;&quot;fn-1&quot;&gt;
+&lt;p&gt;The stabilized implementation and RFC 3013 diverge significantly, in particular there is only one form for &lt;code&gt;--check-cfg&lt;/code&gt;: &lt;code&gt;cfg()&lt;/code&gt; (instead of &lt;code&gt;values()&lt;/code&gt; and &lt;code&gt;names()&lt;/code&gt; being incomplete and subtlety incompatible with each other). &lt;a href&#x3D;&quot;#fnref-1&quot; class&#x3D;&quot;footnote-backref&quot; data-footnote-backref data-footnote-backref-idx&#x3D;&quot;1&quot; aria-label&#x3D;&quot;Back to reference 1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id&#x3D;&quot;fn-2&quot;&gt;
+&lt;p&gt;&lt;code&gt;cargo::rustc-check-cfg&lt;/code&gt; will start working in Rust 1.80 (or nightly-2024-05-05). From Rust 1.77 to Rust 1.79 &lt;em&gt;(inclusive)&lt;/em&gt; it is silently ignored. In Rust 1.76 and below a warning is emitted when used without the unstable Cargo flag &lt;code&gt;-Zcheck-cfg&lt;/code&gt;. &lt;a href&#x3D;&quot;#fnref-2&quot; class&#x3D;&quot;footnote-backref&quot; data-footnote-backref data-footnote-backref-idx&#x3D;&quot;2&quot; aria-label&#x3D;&quot;Back to reference 2&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
+</content>
+
+        <author>
+            <name>Urgau</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Announcing Rustup 1.27.1</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/05/06/Rustup-1.27.1.html" type="text/html" title="Announcing Rustup 1.27.1" />
+        <published>2024-05-06T00:00:00+00:00</published>
+        <updated>2024-05-06T00:00:01+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/05/06/Rustup-1.27.1.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/05/06/Rustup-1.27.1.html">&lt;p&gt;The Rustup team is happy to announce the release of Rustup version 1.27.1.
+&lt;a href&#x3D;&quot;https://rustup.rs&quot;&gt;Rustup&lt;/a&gt; is the recommended tool to install &lt;a href&#x3D;&quot;https://www.rust-lang.org&quot;&gt;Rust&lt;/a&gt;, a programming language that is empowering everyone to build reliable and efficient software.&lt;/p&gt;
+&lt;p&gt;If you have a previous version of Rustup installed, getting Rustup 1.27.1 is as easy as stopping any programs which may be using Rustup (e.g. closing your IDE) and running:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-console&quot;&gt;$ rustup self update
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Rustup will also automatically update itself at the end of a normal toolchain update:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-console&quot;&gt;$ rustup update
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you don&#x27;t have it already, you can &lt;a href&#x3D;&quot;https://rustup.rs&quot;&gt;get Rustup&lt;/a&gt; from the appropriate page on our website.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#whats-new-in-rustup-1271&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;whats-new-in-rustup-1271&quot;&gt;&lt;/a&gt;What&#x27;s new in Rustup 1.27.1&lt;/h2&gt;
+&lt;p&gt;This new Rustup release involves some minor bug fixes.&lt;/p&gt;
+&lt;p&gt;The headlines for this release are:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Prebuilt Rustup binaries should be working on older macOS versions again.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rustup-init&lt;/code&gt; will no longer fail when &lt;code&gt;fish&lt;/code&gt; is installed but &lt;code&gt;~/.config/fish/conf.d&lt;/code&gt; hasn&#x27;t been created.&lt;/li&gt;
+&lt;li&gt;Regressions regarding symlinked &lt;code&gt;RUSTUP_HOME/(toolchains|downloads|tmp)&lt;/code&gt; have been addressed.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Full details are available in the &lt;a href&#x3D;&quot;https://github.com/rust-lang/rustup/blob/stable/CHANGELOG.md&quot;&gt;changelog&lt;/a&gt;!&lt;/p&gt;
+&lt;p&gt;Rustup&#x27;s documentation is also available in &lt;a href&#x3D;&quot;https://rust-lang.github.io/rustup/&quot;&gt;the Rustup Book&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#thanks&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;thanks&quot;&gt;&lt;/a&gt;Thanks&lt;/h2&gt;
+&lt;p&gt;Thanks again to all the contributors who made Rustup 1.27.1 possible!&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Anas (0x61nas)&lt;/li&gt;
+&lt;li&gt;cuiyourong (cuiyourong)&lt;/li&gt;
+&lt;li&gt;Dirkjan Ochtman (djc)&lt;/li&gt;
+&lt;li&gt;Eric Huss (ehuss)&lt;/li&gt;
+&lt;li&gt;eth3lbert (eth3lbert)&lt;/li&gt;
+&lt;li&gt;hev (heiher)&lt;/li&gt;
+&lt;li&gt;klensy (klensy)&lt;/li&gt;
+&lt;li&gt;Chih Wang (ongchi)&lt;/li&gt;
+&lt;li&gt;Adam (pie-flavor)&lt;/li&gt;
+&lt;li&gt;rami3l (rami3l)&lt;/li&gt;
+&lt;li&gt;Robert (rben01)&lt;/li&gt;
+&lt;li&gt;Robert Collins (rbtcollins)&lt;/li&gt;
+&lt;li&gt;Sun Bin (shandongbinzhou)&lt;/li&gt;
+&lt;li&gt;Samuel Moelius (smoelius)&lt;/li&gt;
+&lt;li&gt;vpochapuis (vpochapuis)&lt;/li&gt;
+&lt;li&gt;Renovate Bot (renovate)&lt;/li&gt;
+&lt;/ul&gt;
+</content>
+
+        <author>
+            <name>The Rustup Team</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Announcing Rust 1.78.0</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/05/02/Rust-1.78.0.html" type="text/html" title="Announcing Rust 1.78.0" />
+        <published>2024-05-02T00:00:00+00:00</published>
+        <updated>2024-05-02T00:00:00+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/05/02/Rust-1.78.0.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/05/02/Rust-1.78.0.html">&lt;p&gt;The Rust team is happy to announce a new version of Rust, 1.78.0. Rust is a programming language empowering everyone to build reliable and efficient software.&lt;/p&gt;
+&lt;p&gt;If you have a previous version of Rust installed via &lt;code&gt;rustup&lt;/code&gt;, you can get 1.78.0 with:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-console&quot;&gt;$ rustup update stable
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you don&#x27;t have it already, you can &lt;a href&#x3D;&quot;https://www.rust-lang.org/install.html&quot;&gt;get &lt;code&gt;rustup&lt;/code&gt;&lt;/a&gt; from the appropriate page on our website, and check out the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/releases.html#version-1780-2024-05-02&quot;&gt;detailed release notes for 1.78.0&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;If you&#x27;d like to help us out by testing future releases, you might consider updating locally to use the beta channel (&lt;code&gt;rustup default beta&lt;/code&gt;) or the nightly channel (&lt;code&gt;rustup default nightly&lt;/code&gt;). Please &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/issues/new/choose&quot;&gt;report&lt;/a&gt; any bugs you might come across!&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#whats-in-1780-stable&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;whats-in-1780-stable&quot;&gt;&lt;/a&gt;What&#x27;s in 1.78.0 stable&lt;/h2&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#diagnostic-attributes&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;diagnostic-attributes&quot;&gt;&lt;/a&gt;Diagnostic attributes&lt;/h3&gt;
+&lt;p&gt;Rust now supports a &lt;code&gt;#[diagnostic]&lt;/code&gt; attribute namespace to influence compiler error messages. These are treated as hints which the compiler is not &lt;em&gt;required&lt;/em&gt; to use, and it is also not an error to provide a diagnostic that the compiler doesn&#x27;t recognize. This flexibility allows source code to provide diagnostics even when they&#x27;re not supported by all compilers, whether those are different versions or entirely different implementations.&lt;/p&gt;
+&lt;p&gt;With this namespace comes the first supported attribute, &lt;code&gt;#[diagnostic::on_unimplemented]&lt;/code&gt;, which can be placed on a trait to customize the message when that trait is required but hasn&#x27;t been implemented on a type. Consider the example given in the &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/pull/119888/&quot;&gt;stabilization pull request&lt;/a&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;#[diagnostic::on_unimplemented(
+    message &#x3D; &amp;quot;My Message for &#x60;ImportantTrait&amp;lt;{A}&amp;gt;&#x60; is not implemented for &#x60;{Self}&#x60;&amp;quot;,
+    label &#x3D; &amp;quot;My Label&amp;quot;,
+    note &#x3D; &amp;quot;Note 1&amp;quot;,
+    note &#x3D; &amp;quot;Note 2&amp;quot;
+)]
+trait ImportantTrait&amp;lt;A&amp;gt; {}
+
+fn use_my_trait(_: impl ImportantTrait&amp;lt;i32&amp;gt;) {}
+
+fn main() {
+    use_my_trait(String::new());
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Previously, the compiler would give a builtin error like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;error[E0277]: the trait bound &#x60;String: ImportantTrait&amp;lt;i32&amp;gt;&#x60; is not satisfied
+  --&amp;gt; src/main.rs:12:18
+   |
+12 |     use_my_trait(String::new());
+   |     ------------ ^^^^^^^^^^^^^ the trait &#x60;ImportantTrait&amp;lt;i32&amp;gt;&#x60; is not implemented for &#x60;String&#x60;
+   |     |
+   |     required by a bound introduced by this call
+   |
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With &lt;code&gt;#[diagnostic::on_unimplemented]&lt;/code&gt;, its custom message fills the primary error line, and its custom label is placed on the source output. The original label is still written as help output, and any custom notes are written as well. (These exact details are subject to change.)&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;error[E0277]: My Message for &#x60;ImportantTrait&amp;lt;i32&amp;gt;&#x60; is not implemented for &#x60;String&#x60;
+  --&amp;gt; src/main.rs:12:18
+   |
+12 |     use_my_trait(String::new());
+   |     ------------ ^^^^^^^^^^^^^ My Label
+   |     |
+   |     required by a bound introduced by this call
+   |
+   &#x3D; help: the trait &#x60;ImportantTrait&amp;lt;i32&amp;gt;&#x60; is not implemented for &#x60;String&#x60;
+   &#x3D; note: Note 1
+   &#x3D; note: Note 2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For trait authors, this kind of diagnostic is more useful if you can provide a better hint than just talking about the missing implementation itself. For example, this is an abridged sample from the standard library:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;#[diagnostic::on_unimplemented(
+    message &#x3D; &amp;quot;the size for values of type &#x60;{Self}&#x60; cannot be known at compilation time&amp;quot;,
+    label &#x3D; &amp;quot;doesn&#x27;t have a size known at compile-time&amp;quot;
+)]
+pub trait Sized {}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For more information, see the reference section on &lt;a href&#x3D;&quot;https://doc.rust-lang.org/nightly/reference/attributes/diagnostics.html#the-diagnostic-tool-attribute-namespace&quot;&gt;the &lt;code&gt;diagnostic&lt;/code&gt; tool attribute namespace&lt;/a&gt;.&lt;/p&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#asserting-unsafe-preconditions&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;asserting-unsafe-preconditions&quot;&gt;&lt;/a&gt;Asserting &lt;code&gt;unsafe&lt;/code&gt; preconditions&lt;/h3&gt;
+&lt;p&gt;The Rust standard library has a number of assertions for the preconditions of &lt;code&gt;unsafe&lt;/code&gt; functions, but historically they have only been enabled in &lt;code&gt;#[cfg(debug_assertions)]&lt;/code&gt; builds of the standard library to avoid affecting release performance. However, since the standard library is usually compiled and distributed in release mode, most Rust developers weren&#x27;t ever executing these checks at all.&lt;/p&gt;
+&lt;p&gt;Now, the condition for these assertions is delayed until code generation, so they will be checked depending on the user&#x27;s own setting for debug assertions -- enabled by default in debug and test builds. This change helps users catch undefined behavior in their code, though the details of how much is checked are generally not stable.&lt;/p&gt;
+&lt;p&gt;For example, &lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html&quot;&gt;&lt;code&gt;slice::from_raw_parts&lt;/code&gt;&lt;/a&gt; requires an aligned non-null pointer. The following use of a purposely-misaligned pointer has undefined behavior, and while if you were unlucky it may have &lt;em&gt;appeared&lt;/em&gt; to &amp;quot;work&amp;quot; in the past, the debug assertion can now catch it:&lt;/p&gt;
+&lt;pre&gt;&lt;code class&#x3D;&quot;language-rust&quot;&gt;fn main() {
+    let slice: &amp;amp;[u8] &#x3D; &amp;amp;[1, 2, 3, 4, 5];
+    let ptr &#x3D; slice.as_ptr();
+
+    // Create an offset from &#x60;ptr&#x60; that will always be one off from &#x60;u16&#x60;&#x27;s correct alignment
+    let i &#x3D; usize::from(ptr as usize &amp;amp; 1 &#x3D;&#x3D; 0);
+    
+    let slice16: &amp;amp;[u16] &#x3D; unsafe { std::slice::from_raw_parts(ptr.add(i).cast::&amp;lt;u16&amp;gt;(), 2) };
+    dbg!(slice16);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;thread &#x27;main&#x27; panicked at library/core/src/panicking.rs:220:5:
+unsafe precondition(s) violated: slice::from_raw_parts requires the pointer to be aligned and non-null, and the total size of the slice not to exceed &#x60;isize::MAX&#x60;
+note: run with &#x60;RUST_BACKTRACE&#x3D;1&#x60; environment variable to display a backtrace
+thread caused non-unwinding panic. aborting.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#deterministic-realignment&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;deterministic-realignment&quot;&gt;&lt;/a&gt;Deterministic realignment&lt;/h3&gt;
+&lt;p&gt;The standard library has a few functions that change the alignment of pointers and slices, but they previously had caveats that made them difficult to rely on in practice, if you followed their documentation precisely. Those caveats primarily existed as a hedge against &lt;code&gt;const&lt;/code&gt; evaluation, but they&#x27;re only stable for non-&lt;code&gt;const&lt;/code&gt; use anyway. They are now promised to have consistent runtime behavior according to their actual inputs.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/primitive.pointer.html#method.align_offset&quot;&gt;&lt;code&gt;pointer::align_offset&lt;/code&gt;&lt;/a&gt; computes the offset needed to change a pointer to the given alignment. It returns &lt;code&gt;usize::MAX&lt;/code&gt; if that is not possible, but it was previously permitted to &lt;em&gt;always&lt;/em&gt; return &lt;code&gt;usize::MAX&lt;/code&gt;, and now that behavior is removed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/primitive.slice.html#method.align_to&quot;&gt;&lt;code&gt;slice::align_to&lt;/code&gt;&lt;/a&gt; and &lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/primitive.slice.html#method.align_to_mut&quot;&gt;&lt;code&gt;slice::align_to_mut&lt;/code&gt;&lt;/a&gt; both transmute slices to an aligned middle slice and the remaining unaligned head and tail slices. These methods now promise to return the largest possible middle part, rather than allowing the implementation to return something less optimal like returning everything as the head slice.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#stabilized-apis&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;stabilized-apis&quot;&gt;&lt;/a&gt;Stabilized APIs&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/struct.Stdin.html#impl-Read-for-%26Stdin&quot;&gt;&lt;code&gt;impl Read for &amp;amp;Stdin&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/pull/113833/&quot;&gt;Accept non &lt;code&gt;&#x27;static&lt;/code&gt; lifetimes for several &lt;code&gt;std::error::Error&lt;/code&gt; related implementations&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/pull/114655/&quot;&gt;Make &lt;code&gt;impl&amp;lt;Fd: AsFd&amp;gt;&lt;/code&gt; impl take &lt;code&gt;?Sized&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/io/struct.Error.html#impl-From%3CTryReserveError%3E-for-Error&quot;&gt;&lt;code&gt;impl From&amp;lt;TryReserveError&amp;gt; for io::Error&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;These APIs are now stable in const contexts:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href&#x3D;&quot;https://doc.rust-lang.org/stable/std/sync/struct.Barrier.html#method.new&quot;&gt;&lt;code&gt;Barrier::new()&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#compatibility-notes&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;compatibility-notes&quot;&gt;&lt;/a&gt;Compatibility notes&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;As &lt;a href&#x3D;&quot;https://blog.rust-lang.org/2024/02/26/Windows-7.html&quot;&gt;previously announced&lt;/a&gt;, Rust 1.78 has increased its minimum requirement to Windows 10 for the following targets:
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;x86_64-pc-windows-msvc&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;i686-pc-windows-msvc&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x86_64-pc-windows-gnu&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;i686-pc-windows-gnu&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x86_64-pc-windows-gnullvm&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;i686-pc-windows-gnullvm&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Rust 1.78 has upgraded its bundled LLVM to version 18, completing the announced &lt;a href&#x3D;&quot;https://blog.rust-lang.org/2024/03/30/i128-layout-update.html&quot;&gt;&lt;code&gt;u128&lt;/code&gt;/&lt;code&gt;i128&lt;/code&gt; ABI change&lt;/a&gt; for x86-32 and x86-64 targets. Distributors that use their own LLVM older than 18 may still face the calling convention bugs mentioned in that post.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3&gt;&lt;a href&#x3D;&quot;#other-changes&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;other-changes&quot;&gt;&lt;/a&gt;Other changes&lt;/h3&gt;
+&lt;p&gt;Check out everything that changed in &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust/releases/tag/1.78.0&quot;&gt;Rust&lt;/a&gt;, &lt;a href&#x3D;&quot;https://github.com/rust-lang/cargo/blob/master/CHANGELOG.md#cargo-178-2024-05-02&quot;&gt;Cargo&lt;/a&gt;, and &lt;a href&#x3D;&quot;https://github.com/rust-lang/rust-clippy/blob/master/CHANGELOG.md#rust-178&quot;&gt;Clippy&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#contributors-to-1780&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;contributors-to-1780&quot;&gt;&lt;/a&gt;Contributors to 1.78.0&lt;/h2&gt;
+&lt;p&gt;Many people came together to create Rust 1.78.0. We couldn&#x27;t have done it without all of you. &lt;a href&#x3D;&quot;https://thanks.rust-lang.org/rust/1.78.0/&quot;&gt;Thanks!&lt;/a&gt;&lt;/p&gt;
+</content>
+
+        <author>
+            <name>The Rust Release Team</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Announcing Google Summer of Code 2024 selected projects</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/05/01/gsoc-2024-selected-projects.html" type="text/html" title="Announcing Google Summer of Code 2024 selected projects" />
+        <published>2024-05-01T00:00:00+00:00</published>
+        <updated>2024-05-01T00:00:00+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/05/01/gsoc-2024-selected-projects.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/05/01/gsoc-2024-selected-projects.html">&lt;p&gt;The Rust Project is &lt;a href&#x3D;&quot;https://blog.rust-lang.org/2024/02/21/Rust-participates-in-GSoC-2024.html&quot;&gt;participating&lt;/a&gt; in &lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com&quot;&gt;Google Summer of Code (GSoC) 2024&lt;/a&gt;, a global program organized by Google which is designed to bring new contributors to the world of open-source.&lt;/p&gt;
+&lt;p&gt;In February, we published a list of &lt;a href&#x3D;&quot;https://github.com/rust-lang/google-summer-of-code&quot;&gt;GSoC project ideas&lt;/a&gt;, and started discussing these projects with potential GSoC applicants on our &lt;a href&#x3D;&quot;https://rust-lang.zulipchat.com/#narrow/stream/421156-gsoc&quot;&gt;Zulip&lt;/a&gt;. We were pleasantly surprised by the amount of people that wanted to participate in these projects and that led to many fruitful discussions with members of various Rust teams. Some of them even immediately began contributing to various repositories of the Rust Project, even before GSoC officially started!&lt;/p&gt;
+&lt;p&gt;After the initial discussions, GSoC applicants prepared and submitted their project proposals. We received 65 (!) proposals in total. We are happy to see that there was so much interest, given that this is the first time the Rust Project is participating in GSoC.&lt;/p&gt;
+&lt;p&gt;A team of mentors primarily composed of Rust Project contributors then thoroughly examined the submitted proposals. GSoC required us to produce a ranked list of the best proposals, which was a challenging task in itself since Rust is a big project with many priorities! We went through many rounds of discussions and had to consider many factors, such as prior conversations with the given applicant, the quality and scope of their proposal, the importance of the proposed project for the Rust Project and its wider community, but also the availability of mentors, who are often volunteers and thus have limited time available for mentoring.&lt;/p&gt;
+&lt;p&gt;In many cases, we had multiple proposals that aimed to accomplish the same goal. Therefore, we had to pick only one per project topic despite receiving several high-quality proposals from people we&#x27;d love to work with. We also often had to choose between great proposals targeting different work within the same Rust component to avoid overloading a single mentor with multiple projects.&lt;/p&gt;
+&lt;p&gt;In the end, we narrowed the list down to twelve best proposals, which we felt was the maximum amount that we could realistically support with our available mentor pool. We submitted this list and eagerly awaited how many of these twelve proposals would be accepted into GSoC.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#selected-projects&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;selected-projects&quot;&gt;&lt;/a&gt;Selected projects&lt;/h2&gt;
+&lt;p&gt;On the 1st of May, Google has announced the accepted projects. We are happy to announce that &lt;code&gt;9&lt;/code&gt; proposals out of the twelve that we have submitted were accepted by Google, and will thus participate in Google Summer of Code 2024! Below you can find the list of accepted proposals (in alphabetical order), along with the names of their authors and the assigned mentor(s):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/hADSyIDV&quot;&gt;Adding lint-level configuration to cargo-semver-checks&lt;/a&gt;&lt;/strong&gt; by Max Carr, mentored by Predrag Gruevski&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/zxxeGZMt&quot;&gt;Implementation of a Faster Register Allocator For Cranelift&lt;/a&gt;&lt;/strong&gt; by d-sonuga, mentored by Chris Fallin and Amanieu d&#x27;Antras&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/MeyNanKI&quot;&gt;Improve Rust benchmark suite&lt;/a&gt;&lt;/strong&gt; by s7tya, mentored by Jakub Beránek&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/jjnidpgn&quot;&gt;Move cargo shell completions to Rust&lt;/a&gt;&lt;/strong&gt; by shanmu, mentored by Ed Page&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/P5BC91Hr&quot;&gt;Rewriting Esoteric, Error-Prone Makefile Tests Using Robust Rust Features&lt;/a&gt;&lt;/strong&gt; by Julien Robert, mentored by Jieyou Xu&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/gHEu3vxc&quot;&gt;Rewriting the Rewrite trait&lt;/a&gt;&lt;/strong&gt; by SeoYoung Lee, mentored by Yacin Tmimi&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/IIHP5ozV&quot;&gt;Rust to .NET compiler - add support for compiling &amp;amp; running cargo tests&lt;/a&gt;&lt;/strong&gt; by Fractal Fir, mentored by Jack Huey&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/kXG0mZoj&quot;&gt;Sandboxed and Deterministic Proc Macro using Wasm&lt;/a&gt;&lt;/strong&gt; by Apurva Mishra, mentored by David Lattimore&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href&#x3D;&quot;https://summerofcode.withgoogle.com/programs/2024/projects/rk1Ey4hN&quot;&gt;Tokio async support in Miri&lt;/a&gt;&lt;/strong&gt; by Tiffany Pek Yuan, mentored by Oli Scherer&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Congratulations to all applicants whose project was selected!&lt;/strong&gt; The mentors are looking forward to working with you on these exciting projects to improve the Rust ecosystem. You can expect to hear from us soon, so that we can start coordinating the work on your GSoC projects.&lt;/p&gt;
+&lt;p&gt;We would also like to thank all the applicants whose proposal was sadly not accepted, for their interactions with the Rust community and contributions to various Rust projects. There were some great proposals that did not make the cut, in large part because of limited review capacity. However, even if your proposal was not accepted, we would be happy if you would consider contributing to the projects that got you interested, even outside GSoC! Our &lt;a href&#x3D;&quot;https://github.com/rust-lang/google-summer-of-code&quot;&gt;project idea list&lt;/a&gt; is still actual, and could serve as a general entry point for contributors that would like to work on projects that would help the Rust Project maintainers and the Rust ecosystem.&lt;/p&gt;
+&lt;p&gt;Assuming our involvement in GSoC 2024 is successful, there&#x27;s a good chance we&#x27;ll participate next year as well (though we can&#x27;t promise anything yet) and we hope to receive your proposals again in the future! We also are planning to participate in similar programs in the very near future. Those announcements will come in separate blog posts, so make sure to subscribe to this blog so that you don&#x27;t miss anything.&lt;/p&gt;
+&lt;p&gt;The accepted GSoC projects will run for several months. After GSoC 2024 finishes (in autumn of 2024), we plan to publish a blog post in which we will summarize the outcome of the accepted projects.&lt;/p&gt;
+</content>
+
+        <author>
+            <name>Jakub Beránek, Jack Huey and Paul Lenz</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Security advisory for the standard library (CVE-2024-24576)</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/04/09/cve-2024-24576.html" type="text/html" title="Security advisory for the standard library (CVE-2024-24576)" />
+        <published>2024-04-09T00:00:00+00:00</published>
+        <updated>2024-04-09T00:00:00+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/04/09/cve-2024-24576.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/04/09/cve-2024-24576.html">&lt;p&gt;The Rust Security Response WG was notified that the Rust standard library did
+not properly escape arguments when invoking batch files (with the &lt;code&gt;bat&lt;/code&gt; and
+&lt;code&gt;cmd&lt;/code&gt; extensions) on Windows using the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/process/struct.Command.html&quot;&gt;&lt;code&gt;Command&lt;/code&gt;&lt;/a&gt; API. An attacker able to
+control the arguments passed to the spawned process could execute arbitrary
+shell commands by bypassing the escaping.&lt;/p&gt;
+&lt;p&gt;The severity of this vulnerability is &lt;strong&gt;critical&lt;/strong&gt; if you are invoking batch
+files on Windows with untrusted arguments. No other platform or use is
+affected.&lt;/p&gt;
+&lt;p&gt;This vulnerability is identified by CVE-2024-24576.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#overview&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;overview&quot;&gt;&lt;/a&gt;Overview&lt;/h2&gt;
+&lt;p&gt;The &lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/process/struct.Command.html#method.arg&quot;&gt;&lt;code&gt;Command::arg&lt;/code&gt;&lt;/a&gt; and &lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/process/struct.Command.html#method.args&quot;&gt;&lt;code&gt;Command::args&lt;/code&gt;&lt;/a&gt; APIs state in their
+documentation that the arguments will be passed to the spawned process as-is,
+regardless of the content of the arguments, and will not be evaluated by a
+shell. This means it should be safe to pass untrusted input as an argument.&lt;/p&gt;
+&lt;p&gt;On Windows, the implementation of this is more complex than other platforms,
+because the Windows API only provides a single string containing all the
+arguments to the spawned process, and it&#x27;s up to the spawned process to split
+them. Most programs use the standard C run-time argv, which in practice results
+in a mostly consistent way arguments are splitted.&lt;/p&gt;
+&lt;p&gt;One exception though is &lt;code&gt;cmd.exe&lt;/code&gt; (used among other things to execute batch
+files), which has its own argument splitting logic. That forces the standard
+library to implement custom escaping for arguments passed to batch files.
+Unfortunately it was reported that our escaping logic was not thorough enough,
+and it was possible to pass malicious arguments that would result in arbitrary
+shell execution.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#mitigations&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;mitigations&quot;&gt;&lt;/a&gt;Mitigations&lt;/h2&gt;
+&lt;p&gt;Due to the complexity of &lt;code&gt;cmd.exe&lt;/code&gt;, we didn&#x27;t identify a solution that would
+correctly escape arguments in all cases. To maintain our API guarantees, we
+improved the robustness of the escaping code, and changed the &lt;code&gt;Command&lt;/code&gt; API to
+return an &lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/io/enum.ErrorKind.html#variant.InvalidInput&quot;&gt;&lt;code&gt;InvalidInput&lt;/code&gt;&lt;/a&gt; error when it cannot safely escape an argument.
+This error will be emitted when spawning the process.&lt;/p&gt;
+&lt;p&gt;The fix will be included in Rust 1.77.2, to be released later today.&lt;/p&gt;
+&lt;p&gt;If you implement the escaping yourself or only handle trusted inputs, on
+Windows you can also use the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/std/os/windows/process/trait.CommandExt.html#tymethod.raw_arg&quot;&gt;&lt;code&gt;CommandExt::raw_arg&lt;/code&gt;&lt;/a&gt; method to bypass the
+standard library&#x27;s escaping logic.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#affected-versions&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;affected-versions&quot;&gt;&lt;/a&gt;Affected Versions&lt;/h2&gt;
+&lt;p&gt;All Rust versions before 1.77.2 on Windows are affected, if your code or one of
+your dependencies executes batch files with untrusted arguments. Other
+platforms or other uses on Windows are not affected.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#acknowledgments&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;acknowledgments&quot;&gt;&lt;/a&gt;Acknowledgments&lt;/h2&gt;
+&lt;p&gt;We want to thank RyotaK for responsibly disclosing this to us according to the
+&lt;a href&#x3D;&quot;https://www.rust-lang.org/policies/security&quot;&gt;Rust security policy&lt;/a&gt;, and Simon Sawicki (Grub4K) for identifying some of
+the escaping rules we adopted in our fix.&lt;/p&gt;
+&lt;p&gt;We also want to thank the members of the Rust project who helped us disclose
+the vulnerability: Chris Denton for developing the fix; Mara Bos for reviewing
+the fix; Pietro Albini for writing this advisory; Pietro Albini, Manish
+Goregaokar and Josh Stone for coordinating this disclosure; Amanieu d&#x27;Antras
+for advising during the disclosure.&lt;/p&gt;
+</content>
+
+        <author>
+            <name>The Rust Security Response WG</name>
+        </author>
+    </entry>
+    <entry>
+        <title>Changes to Rust&#x27;s WASI targets</title>
+        <link rel="alternate" href="https://blog.rust-lang.org/2024/04/09/updates-to-rusts-wasi-targets.html" type="text/html" title="Changes to Rust&#x27;s WASI targets" />
+        <published>2024-04-09T00:00:00+00:00</published>
+        <updated>2024-04-09T00:00:01+00:00</updated>
+        <id>https://blog.rust-lang.org/2024/04/09/updates-to-rusts-wasi-targets.html</id>
+        <content type="html" xml:base="https://blog.rust-lang.org/2024/04/09/updates-to-rusts-wasi-targets.html">&lt;p&gt;&lt;a href&#x3D;&quot;https://bytecodealliance.org/articles/WASI-0.2&quot;&gt;WASI 0.2 was recently
+stabilized&lt;/a&gt;, and Rust has begun
+implementing first-class support for it in the form of a dedicated new target.
+Rust 1.78 will introduce new &lt;code&gt;wasm32-wasip1&lt;/code&gt; (tier 2) and &lt;code&gt;wasm32-wasip2&lt;/code&gt; (tier
+3) targets. &lt;code&gt;wasm32-wasip1&lt;/code&gt; is an effective rename of the existing &lt;code&gt;wasm32-wasi&lt;/code&gt;
+target, freeing the target name up for an eventual WASI 1.0 release. &lt;strong&gt;Starting
+Rust 1.78 (May 2nd, 2024), users of WASI 0.1 are encouraged to begin migrating
+to the new &lt;code&gt;wasm32-wasip1&lt;/code&gt; target before the existing &lt;code&gt;wasm32-wasi&lt;/code&gt; target is
+removed in Rust 1.84 (January 5th, 2025).&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;In this post we&#x27;ll discuss the introduction of the new targets, the motivation
+behind it, what that means for the existing WASI targets, and a detailed
+schedule for these changes. This post is about the WASI targets only; the
+existing &lt;code&gt;wasm32-unknown-unknown&lt;/code&gt; and &lt;code&gt;wasm32-unknown-emscripten&lt;/code&gt; targets are
+unaffected by any changes in this post.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#introducing-wasm32-wasip2&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;introducing-wasm32-wasip2&quot;&gt;&lt;/a&gt;Introducing &lt;code&gt;wasm32-wasip2&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;After nearly five years of work the &lt;a href&#x3D;&quot;https://wasi.dev&quot;&gt;WASI 0.2 specification&lt;/a&gt;
+was recently stabilized. This work builds on &lt;a href&#x3D;&quot;https://component-model.bytecodealliance.org&quot;&gt;WebAssembly
+Components&lt;/a&gt; (think: strongly-typed
+ABI for Wasm), providing standard interfaces for things like asynchronous IO,
+networking, and HTTP. This will finally make it possible to write asynchronous
+networked services on top of WASI, something which wasn&#x27;t possible using WASI
+0.1.&lt;/p&gt;
+&lt;p&gt;People interested in compiling Rust code to WASI 0.2 today are able to do so
+using the &lt;a href&#x3D;&quot;https://github.com/bytecodealliance/cargo-component&quot;&gt;cargo-component&lt;/a&gt;
+tool. This tool is able to take WASI 0.1 binaries, and transform them to WASI 0.2
+Components using a shim. It also provides native support for common cargo
+commands such as &lt;code&gt;cargo build&lt;/code&gt;, &lt;code&gt;cargo test&lt;/code&gt;, and &lt;code&gt;cargo run&lt;/code&gt;. While it
+introduces some inefficiencies because of the additional translation layer, in
+practice this already works really well and people should be able to get
+started with WASI 0.2 development.&lt;/p&gt;
+&lt;p&gt;We&#x27;re however keen to begin making that translation layer obsolete. And for
+that reason we&#x27;re happy to share that Rust has made its first steps towards
+that with the introduction of the &lt;a href&#x3D;&quot;https://doc.rust-lang.org/rustc/platform-support.html#tier-3&quot;&gt;tier
+3&lt;/a&gt; &lt;code&gt;wasm32-wasip2&lt;/code&gt;
+target landing in Rust 1.78. &lt;strong&gt;This will initially miss a lot of expected&lt;/strong&gt;
+&lt;strong&gt;features such as stdlib support, and we don&#x27;t recommend people use this target&lt;/strong&gt;
+&lt;strong&gt;quite yet.&lt;/strong&gt; But as we fill in those missing features over the coming months, we
+aim to eventually meet the criteria to become a tier 2 target, at which
+point the &lt;code&gt;wasm32-wasip2&lt;/code&gt; target would be considered ready for general use. This
+work will happen through 2024, and we expect for this to land before the end of
+the calendar year.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#renaming-wasm32-wasi-to-wasm32-wasip1&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;renaming-wasm32-wasi-to-wasm32-wasip1&quot;&gt;&lt;/a&gt;Renaming &lt;code&gt;wasm32-wasi&lt;/code&gt; to &lt;code&gt;wasm32-wasip1&lt;/code&gt;&lt;/h2&gt;
+&lt;p&gt;The original name for what we now call WASI 0.1 was &amp;quot;WebAssembly System
+Interface, snapshot 1&amp;quot;. Rust shipped support for this in 2019, and we did so
+knowing the target would likely undergo significant changes in the future. With
+the knowledge we have today though, we would not have chosen to introduce the
+&amp;quot;WASI, snapshot 1&amp;quot; target as &lt;code&gt;wasm32-wasi&lt;/code&gt;. We should have instead chosen to add
+some suffix to the initial target triple so that the eventual stable WASI 1.0
+target can just be called &lt;code&gt;wasm32-wasi&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;In anticipation of both an eventual WASI 1.0 target, and to preserve consistency
+between target names, we&#x27;ll begin rolling out a name change to the existing WASI
+0.1 target. Starting in Rust 1.78 (May 2nd, 2024) a new &lt;code&gt;wasm32-wasip1&lt;/code&gt; target
+will become available. Starting Rust 1.81 (September 5th, 2024) we will begin
+warning existing users of &lt;code&gt;wasm32-wasi&lt;/code&gt; to migrate to &lt;code&gt;wasm32-wasip1&lt;/code&gt;. And
+finally in Rust 1.84 (January 9th, 2025) the &lt;code&gt;wasm32-wasi&lt;/code&gt; target will no longer
+be shipped on the stable release channel. This will provide an 8 month
+transition period for projects to switch to the new target name when they update
+their Rust toolchains.&lt;/p&gt;
+&lt;p&gt;The name &lt;code&gt;wasip1&lt;/code&gt; can be read as either &amp;quot;WASI (zero) point one&amp;quot; or &amp;quot;WASI preview
+one&amp;quot;. The official specification uses the &amp;quot;preview&amp;quot; moniker, however in most
+communication the form &amp;quot;WASI 0.1&amp;quot; is now preferred. This target triple was
+chosen because it not only maps to both terms, but also more closely resembles
+the target terminology used in &lt;a href&#x3D;&quot;https://go.dev/blog/wasi&quot;&gt;other programming
+languages&lt;/a&gt;. This is something the WASI Preview 2
+specification &lt;a href&#x3D;&quot;https://github.com/WebAssembly/WASI/tree/f45e72e5294e990c23d548eea32fd35c80525fd6/preview2#introduction&quot;&gt;also makes note
+of&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#timeline&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;timeline&quot;&gt;&lt;/a&gt;Timeline&lt;/h2&gt;
+&lt;p&gt;This table provides the dates and cut-offs for the target rename from
+&lt;code&gt;wasm32-wasi&lt;/code&gt; to &lt;code&gt;wasm32-wasip1&lt;/code&gt;. The dates in this table do not apply to the
+newly-introduced &lt;code&gt;wasm32-wasi-preview1-threads&lt;/code&gt; target; this will be renamed to
+&lt;code&gt;wasm32-wasip1-threads&lt;/code&gt; in Rust 1.78 without going through a transition period.
+The tier 3 &lt;code&gt;wasm32-wasip2&lt;/code&gt; target will also be made available in Rust 1.78.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;date&lt;/th&gt;
+&lt;th&gt;Rust Stable&lt;/th&gt;
+&lt;th&gt;Rust Beta&lt;/th&gt;
+&lt;th&gt;Rust Nightly&lt;/th&gt;
+&lt;th&gt;Notes&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;2024-02-08&lt;/td&gt;
+&lt;td&gt;1.76&lt;/td&gt;
+&lt;td&gt;1.77&lt;/td&gt;
+&lt;td&gt;1.78&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;wasm32-wasip1&lt;/code&gt; available on nightly&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2024-03-21&lt;/td&gt;
+&lt;td&gt;1.77&lt;/td&gt;
+&lt;td&gt;1.78&lt;/td&gt;
+&lt;td&gt;1.79&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;wasm32-wasip1&lt;/code&gt; available on beta&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2024-05-02&lt;/td&gt;
+&lt;td&gt;1.78&lt;/td&gt;
+&lt;td&gt;1.79&lt;/td&gt;
+&lt;td&gt;1.80&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;wasm32-wasip1&lt;/code&gt; available on stable&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2024-06-13&lt;/td&gt;
+&lt;td&gt;1.79&lt;/td&gt;
+&lt;td&gt;1.80&lt;/td&gt;
+&lt;td&gt;1.81&lt;/td&gt;
+&lt;td&gt;warn if &lt;code&gt;wasm32-wasi&lt;/code&gt; is used on nightly&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2024-07-25&lt;/td&gt;
+&lt;td&gt;1.80&lt;/td&gt;
+&lt;td&gt;1.81&lt;/td&gt;
+&lt;td&gt;1.82&lt;/td&gt;
+&lt;td&gt;warn if &lt;code&gt;wasm32-wasi&lt;/code&gt; is used on beta&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2024-09-05&lt;/td&gt;
+&lt;td&gt;1.81&lt;/td&gt;
+&lt;td&gt;1.82&lt;/td&gt;
+&lt;td&gt;1.83&lt;/td&gt;
+&lt;td&gt;warn if &lt;code&gt;wasm32-wasi&lt;/code&gt; is used on stable&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2024-10-17&lt;/td&gt;
+&lt;td&gt;1.82&lt;/td&gt;
+&lt;td&gt;1.83&lt;/td&gt;
+&lt;td&gt;1.84&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;wasm32-wasi&lt;/code&gt; unavailable on nightly&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2024-11-28&lt;/td&gt;
+&lt;td&gt;1.83&lt;/td&gt;
+&lt;td&gt;1.84&lt;/td&gt;
+&lt;td&gt;1.85&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;wasm32-wasi&lt;/code&gt; unavailable on beta&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;2025-01-09&lt;/td&gt;
+&lt;td&gt;1.84&lt;/td&gt;
+&lt;td&gt;1.85&lt;/td&gt;
+&lt;td&gt;1.86&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;wasm32-wasi&lt;/code&gt; unavailable on stable&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2&gt;&lt;a href&#x3D;&quot;#conclusion&quot; aria-hidden&#x3D;&quot;true&quot; class&#x3D;&quot;anchor&quot; id&#x3D;&quot;conclusion&quot;&gt;&lt;/a&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;In this post we&#x27;ve discussed the upcoming updates to Rust&#x27;s WASI targets. Come
+Rust 1.78 the &lt;code&gt;wasm32-wasip1&lt;/code&gt; (tier 2) and &lt;code&gt;wasm32-wasip2&lt;/code&gt; (tier 3) targets will
+be added. In Rust 1.81 we will begin warning if &lt;code&gt;wasm32-wasi&lt;/code&gt; is being used. And
+in Rust 1.84, the existing &lt;code&gt;wasm32-wasi&lt;/code&gt; target will be removed. This will free
+up &lt;code&gt;wasm32-wasi&lt;/code&gt; to eventually be used for a WASI 1.0 target. Users will have 8
+months to switch to the new target name when they update their Rust toolchains.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;wasm32-wasip2&lt;/code&gt; target marks the start of native support for WASI 0.2. In
+order to target it today from Rust, people are encouraged to use
+&lt;a href&#x3D;&quot;https://github.com/bytecodealliance/cargo-component&quot;&gt;cargo-component&lt;/a&gt; tool
+instead. The plan is to eventually graduate &lt;code&gt;wasm32-wasip2&lt;/code&gt; to a tier-2 target,
+at which point &lt;code&gt;cargo-component&lt;/code&gt; will be upgraded to support it natively instead.&lt;/p&gt;
+&lt;p&gt;With WASI 0.2 finally stable, it&#x27;s an exciting time for WebAssembly development.
+We&#x27;re happy for Rust to begin implementing native support for WASI 0.2, and
+we&#x27;re excited about what this will enable people to build.&lt;/p&gt;
+</content>
+
+        <author>
+            <name>Yosh Wuyts</name>
+        </author>
+    </entry>
+</feed>

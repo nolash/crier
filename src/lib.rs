@@ -8,10 +8,12 @@ use rs_sha512::Sha512Hasher;
 use chrono::DateTime;
 mod io;
 
+
 pub struct Sequencer {
     pub items: HashMap<u64, Vec<u8>>,
     item_keys: Vec<u64>,
     crsr: usize,
+    limit: usize,
 }
 
 pub struct SequencerEntry {
@@ -24,7 +26,8 @@ impl Sequencer {
         Sequencer {
             items: HashMap::new(),
             crsr: 0,
-            item_keys: Vec::<u64>::new(),
+            limit: 0,
+            item_keys: Vec::new(),
         }
     }
 
@@ -37,7 +40,7 @@ impl Sequencer {
         return true;
     }
 
-    pub fn add_all(&mut self, feed: Feed) -> i64 {
+    pub fn add_from(&mut self, feed: Feed) -> i64 {
         let mut c: i64;
 
         c = 0;
@@ -55,7 +58,26 @@ impl Iterator for Sequencer {
     fn next(&mut self) -> Option<Self::Item> {
         let c: u64;
 
+        if self.limit == 0 {
+            self.item_keys = Vec::new();
+            for k in  self.items.keys() {
+                self.item_keys.push(k.clone());
+                self.limit += 1;
+            }
+        }
+
+        if self.limit == 0 {
+            return None;
+        }
+
+        if self.crsr == self.limit {
+            self.limit = 0;
+            self.crsr = 0;
+            return None;
+        }
+
         c = self.item_keys[self.crsr];
+        self.crsr += 1;
         return Some(self.items[&c].clone());
     }
 }
