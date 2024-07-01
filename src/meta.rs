@@ -1,5 +1,6 @@
 use atom_syndication::Person;
 use atom_syndication::Feed;
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub enum Error {
@@ -10,6 +11,7 @@ pub enum Error {
 pub struct FeedMetadata {
     pub author: Person,
     pub title: String,
+    pub id: String,
     incomplete: bool,
 }
 
@@ -22,6 +24,7 @@ impl Default for FeedMetadata {
                 uri: Some("?".to_string()),
             },
             title: String::from("?"),
+            id: Uuid::new_v4().to_string(),
             incomplete: true,
         }
     }

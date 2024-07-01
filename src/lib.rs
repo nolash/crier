@@ -21,6 +21,10 @@ pub enum Error {
     WriteError,
 }
 
+pub trait Cache {
+    fn open(&self, id: String) -> &mut dyn Write;
+    fn close(&self, id: String) -> usize;
+}
 
 pub struct Sequencer<'a> {
     metadata: FeedMetadata,
@@ -29,7 +33,7 @@ pub struct Sequencer<'a> {
     crsr: usize,
     limit: usize,
     default_cache: Vec<u8>,
-    cache: Option<&'a mut dyn Write>,
+    cache: Option<&'a dyn Cache>,
 }
 
 pub struct SequencerEntry {
@@ -55,26 +59,40 @@ impl<'a> Sequencer<'a> {
         o
     }
 
-    pub fn with_cache(&mut self, w: &'a mut impl Write) -> &Sequencer<'a> {
+    pub fn with_cache(&mut self, w: &'a impl Cache) -> &Sequencer<'a> {
         self.cache = Some(w);
         return self;
     }
 
     pub fn add(&mut self, entry: Entry) -> bool {
+        let have_closer: bool;
         let mut w: &mut dyn Write;
+        let mut id: String;
+
+        id = entry.id.to_string();
         match &mut self.cache {
             Some(v) => {
-                w = v;
+                w = v.open(id);
+                have_closer = true;
             },
             None => {
                 w = &mut self.default_cache;
             },
         }
+
+        id = entry.id.to_string();
         let o = SequencerEntry::new(entry, w);
         if self.items.contains_key(&o.digest) {
             return false;
         }
         self.items.insert(o.digest, o.into());
+        match &mut self.cache {
+            Some(v) => {
+                v.close(id);
+            },
+            None => {
+            },
+        }
         return true;
     }
 
