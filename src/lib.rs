@@ -22,12 +22,14 @@ pub enum Error {
 }
 
 
-pub struct Sequencer {
+pub struct Sequencer<'a> {
     metadata: FeedMetadata,
     pub items: HashMap<u64, Vec<u8>>,
     item_keys: Vec<u64>,
     crsr: usize,
     limit: usize,
+    default_cache: Vec<u8>,
+    cache: Option<&'a mut dyn Write>,
 }
 
 pub struct SequencerEntry {
@@ -35,14 +37,16 @@ pub struct SequencerEntry {
     entry: Entry,
 }
 
-impl Sequencer {
-    pub fn new() -> Sequencer {
+impl<'a> Sequencer<'a> {
+    pub fn new() -> Sequencer<'a> {
         let mut o = Sequencer {
             metadata: FeedMetadata::default(),
             items: HashMap::new(),
             crsr: 0,
             limit: 0,
             item_keys: Vec::new(),
+            default_cache: Vec::<u8>::new(),
+            cache: None,
         };
 
         #[cfg(test)]
@@ -51,8 +55,22 @@ impl Sequencer {
         o
     }
 
+    pub fn with_cache(&mut self, w: &'a mut impl Write) -> &Sequencer<'a> {
+        self.cache = Some(w);
+        return self;
+    }
+
     pub fn add(&mut self, entry: Entry) -> bool {
-        let o = SequencerEntry::new(entry);
+        let mut w: &mut dyn Write;
+        match &mut self.cache {
+            Some(v) => {
+                w = v;
+            },
+            None => {
+                w = &mut self.default_cache;
+            },
+        }
+        let o = SequencerEntry::new(entry, w);
         if self.items.contains_key(&o.digest) {
             return false;
         }
@@ -103,7 +121,7 @@ impl Sequencer {
     }
 }
 
-impl Iterator for Sequencer {
+impl<'a> Iterator for Sequencer<'a> {
     type Item = Vec<u8>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -134,7 +152,7 @@ impl Iterator for Sequencer {
 }
 
 impl SequencerEntry {
-    pub fn new(entry: Entry) -> SequencerEntry {
+    pub fn new(entry: Entry, exporter: &mut dyn Write) -> SequencerEntry {
         let mut have_date: bool;
         let mut id_part: u32;
         let mut o = SequencerEntry {
