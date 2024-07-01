@@ -11,10 +11,11 @@ use atom_syndication::Feed as OutFeed;
 use std::io::Write;
 mod meta;
 mod io;
+use meta::FeedMetadata;
 
 
 pub struct Sequencer {
-    metadata: meta::FeedMetadata,
+    metadata: FeedMetadata,
     pub items: HashMap<u64, Vec<u8>>,
     item_keys: Vec<u64>,
     crsr: usize,
@@ -29,6 +30,7 @@ pub struct SequencerEntry {
 impl Sequencer {
     pub fn new() -> Sequencer {
         Sequencer {
+            metadata: FeedMetadata::default(),
             items: HashMap::new(),
             crsr: 0,
             limit: 0,
@@ -66,6 +68,7 @@ impl Sequencer {
         feed.set_id("urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6");
         feed.set_title("Mixed feed");
         feed.set_updated(Local::now().to_utc());
+        self.metadata.apply(&mut feed);
         //feed.write_to(&mut v)?;
         feed.write_to(w)?;
         Ok(())
