@@ -1,7 +1,11 @@
 use std::clone::Clone;
+use std::fs::Metadata;
+use std::fs::metadata;
+use std::fs::File;
 
 use feed_rs::model::Entry;
 use chrono::DateTime;
+use tempfile::NamedTempFile;
 
 use super::Sequencer;
 use super::io::FeedGet;
@@ -70,4 +74,23 @@ fn test_feed_mix() {
     assert_eq!(r, 10);
     assert_eq!(seq.by_ref().count(), 25);
     assert_eq!(seq.count(), 25);
+}
+
+#[test]
+#[cfg(feature = "fs")]
+fn test_feed_write() {
+    let r: Metadata;
+    let fs = Fs{};
+    let f: NamedTempFile;
+    let fr: File;
+    let fp: String;
+
+    let feed = fs.get("testdata/test.atom.xml", None).unwrap();
+    let mut seq = Sequencer::new();
+    seq.add_from(feed); 
+    f = NamedTempFile::new().unwrap();
+    fr = f.reopen().unwrap();
+    fp = String::from(f.path().to_str().unwrap());
+    seq.write_to(f).unwrap();
+    assert_eq!(fr.metadata().unwrap().len(), 204);
 }

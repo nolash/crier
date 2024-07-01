@@ -8,7 +8,8 @@ rust-version = "1.79"
 
 [dependencies]
 #rss = "^2.0.3"
-feed-rs = "^2.0.0"
+feed-rs = "^2.0"
+rss = "^2.0"
 #activitypub_federation = "^0.4.0"
 #json-ld = "^0.14.1"
 digest = "^0.10.7"
@@ -18,6 +19,7 @@ clap = "2.34.0"
 rs_sha512 = "^0.1.3"
 http = "^1.0"
 chrono = "^0.4"
+atom_syndication = "^0.12"
 
 [dev-dependencies]
 tempfile = "3.3.0"
