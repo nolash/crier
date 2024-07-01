@@ -91,5 +91,5 @@ fn test_feed_write() {
     fr = f.reopen().unwrap();
     r = seq.write_to(f).unwrap();
     assert_eq!(r, 15);
-    assert_eq!(fr.metadata().unwrap().len(), 301);
+    assert_eq!(fr.metadata().unwrap().len(), 254);
 }

@@ -1,28 +1,45 @@
 use atom_syndication::Person;
 use atom_syndication::Feed;
 
+#[derive(Debug)]
+pub enum Error {
+    IncompleteFeedMetadata,
+}
+
+
 pub struct FeedMetadata {
     pub author: Person,
-    complete: bool,
+    pub title: String,
+    incomplete: bool,
 }
 
 impl Default for FeedMetadata {
     fn default() -> FeedMetadata {
         FeedMetadata{
             author: Person{
-                name: "No One".to_string(),
-                email: Some("none@devnull.com".to_string()),
-                uri: Some("https://devnull.com".to_string()),
+                name: "?".to_string(),
+                email: Some("?".to_string()),
+                uri: Some("?".to_string()),
             },
-            complete: false,
+            title: String::from("?"),
+            incomplete: true,
         }
     }
 }
 
 impl FeedMetadata {
-    pub fn apply(&self, feed: &mut Feed) {
+    pub fn force(&mut self) {
+        self.incomplete = false;
+    }
+
+    pub fn apply(&self, feed: &mut Feed) -> Result<(), Error> {
+        if self.incomplete {
+            return Err(Error::IncompleteFeedMetadata);
+        }
         let mut persons = Vec::<Person>::new();
         persons.push(self.author.clone());
         feed.set_authors(persons);
+        feed.set_title(self.title.clone());
+        Ok(())
     }
 }

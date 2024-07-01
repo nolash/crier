@@ -2,16 +2,24 @@ use std::collections::HashMap;
 use std::hash::Hasher;
 use std::hash::Hash;
 use std::iter::Iterator;
+use std::io::Write;
+use std::error::Error as StdError;
+
 use feed_rs::model::Entry;
 use feed_rs::model::Feed;
 use rs_sha512::Sha512Hasher;
 use chrono::DateTime;
 use chrono::Local;
 use atom_syndication::Feed as OutFeed;
-use std::io::Write;
+
 mod meta;
 mod io;
 use meta::FeedMetadata;
+
+#[derive(Debug)]
+pub enum Error {
+    WriteError,
+}
 
 
 pub struct Sequencer {
@@ -29,13 +37,18 @@ pub struct SequencerEntry {
 
 impl Sequencer {
     pub fn new() -> Sequencer {
-        Sequencer {
+        let mut o = Sequencer {
             metadata: FeedMetadata::default(),
             items: HashMap::new(),
             crsr: 0,
             limit: 0,
             item_keys: Vec::new(),
-        }
+        };
+
+        #[cfg(test)]
+        o.metadata.force();
+
+        o
     }
 
     pub fn add(&mut self, entry: Entry) -> bool {
@@ -58,14 +71,28 @@ impl Sequencer {
         c
     }
 
-    fn write_to(&mut self, w: impl Write) -> Result<usize, atom_syndication::Error> {
+    fn write_to(&mut self, w: impl Write) -> Result<usize, Error> {
         let mut r: usize;
         let mut feed = OutFeed::default();
         feed.set_id("urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6");
-        feed.set_title("Mixed feed");
         feed.set_updated(Local::now().to_utc());
-        self.metadata.apply(&mut feed);
-        feed.write_to(w)?;
+
+        match self.metadata.apply(&mut feed) {
+            Err(v) => {
+                return Err(Error::WriteError);
+            },
+            Ok(_) => {
+            },
+
+        }
+
+        match feed.write_to(w) {
+            Err(v) => {
+                return Err(Error::WriteError);
+            },
+            Ok(_) => {
+            },
+        }
 
         r = 0;
         for v in self {
