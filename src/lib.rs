@@ -58,14 +58,21 @@ impl Sequencer {
         c
     }
 
-    fn write_to(&self, w: impl Write) -> Result<(), atom_syndication::Error> {
+    fn write_to(&mut self, w: impl Write) -> Result<usize, atom_syndication::Error> {
+        let mut r: usize;
         let mut feed = OutFeed::default();
         feed.set_id("urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6");
         feed.set_title("Mixed feed");
         feed.set_updated(Local::now().to_utc());
         self.metadata.apply(&mut feed);
         feed.write_to(w)?;
-        Ok(())
+
+        r = 0;
+        for v in self {
+            r += 1;
+        }
+
+        Ok(r)
     }
 }
 

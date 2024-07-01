@@ -79,6 +79,7 @@ fn test_feed_mix() {
 #[test]
 #[cfg(feature = "fs")]
 fn test_feed_write() {
+    let r: usize;
     let fs = Fs{};
     let f: NamedTempFile;
     let fr: File;
@@ -88,6 +89,7 @@ fn test_feed_write() {
     seq.add_from(feed); 
     f = NamedTempFile::new().unwrap();
     fr = f.reopen().unwrap();
-    seq.write_to(f).unwrap();
+    r = seq.write_to(f).unwrap();
+    assert_eq!(r, 15);
     assert_eq!(fr.metadata().unwrap().len(), 301);
 }
