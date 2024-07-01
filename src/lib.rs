@@ -9,10 +9,12 @@ use chrono::DateTime;
 use chrono::Local;
 use atom_syndication::Feed as OutFeed;
 use std::io::Write;
+mod meta;
 mod io;
 
 
 pub struct Sequencer {
+    metadata: meta::FeedMetadata,
     pub items: HashMap<u64, Vec<u8>>,
     item_keys: Vec<u64>,
     crsr: usize,
