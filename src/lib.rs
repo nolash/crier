@@ -14,17 +14,17 @@ use atom_syndication::Feed as OutFeed;
 
 mod meta;
 mod io;
+mod mem;
 use meta::FeedMetadata;
+use mem::MemCache;
+use mem::CacheWriter;
+use mem::Cache;
 
 #[derive(Debug)]
 pub enum Error {
     WriteError,
 }
 
-pub trait Cache {
-    fn open(&self, id: String) -> &mut dyn Write;
-    fn close(&self, id: String) -> usize;
-}
 
 pub struct Sequencer<'a> {
     metadata: FeedMetadata,
@@ -32,8 +32,8 @@ pub struct Sequencer<'a> {
     item_keys: Vec<u64>,
     crsr: usize,
     limit: usize,
-    default_cache: Vec<u8>,
-    cache: Option<&'a dyn Cache>,
+    default_cache: CacheWriter, //HashMap<String, Vec<u8>>,
+    cache: Option<&'a mut dyn Cache>,
 }
 
 pub struct SequencerEntry {
@@ -49,7 +49,7 @@ impl<'a> Sequencer<'a> {
             crsr: 0,
             limit: 0,
             item_keys: Vec::new(),
-            default_cache: Vec::<u8>::new(),
+            default_cache: CacheWriter::new(), //HashMap::new(),
             cache: None,
         };
 
@@ -59,7 +59,7 @@ impl<'a> Sequencer<'a> {
         o
     }
 
-    pub fn with_cache(&mut self, w: &'a impl Cache) -> &Sequencer<'a> {
+    pub fn with_cache(&mut self, w: &'a mut impl Cache) -> &Sequencer<'a> {
         self.cache = Some(w);
         return self;
     }
