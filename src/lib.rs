@@ -3,12 +3,12 @@ use std::hash::Hasher;
 use std::hash::Hash;
 use std::iter::Iterator;
 use std::io::Write;
-use std::error::Error as StdError;
+//use std::error::Error as StdError;
 
 use feed_rs::model::Entry;
 use feed_rs::model::Feed;
 use rs_sha512::Sha512Hasher;
-use chrono::DateTime;
+//use chrono::DateTime;
 use chrono::Local;
 use atom_syndication::Feed as OutFeed;
 
@@ -16,7 +16,7 @@ mod meta;
 mod io;
 mod mem;
 use meta::FeedMetadata;
-use mem::MemCache;
+//use mem::MemCache;
 use mem::CacheWriter;
 use mem::Cache;
 
@@ -65,15 +65,13 @@ impl<'a> Sequencer<'a> {
     }
 
     pub fn add(&mut self, entry: Entry) -> bool {
-        let have_closer: bool;
-        let mut w: &mut dyn Write;
+        let w: &mut dyn Write;
         let mut id: String;
 
         id = entry.id.to_string();
         match &mut self.cache {
             Some(v) => {
                 w = v.open(id);
-                have_closer = true;
             },
             None => {
                 w = &mut self.default_cache;
@@ -114,7 +112,7 @@ impl<'a> Sequencer<'a> {
         feed.set_updated(Local::now().to_utc());
 
         match self.metadata.apply(&mut feed) {
-            Err(v) => {
+            Err(_v) => {
                 return Err(Error::WriteError);
             },
             Ok(_) => {
@@ -123,7 +121,7 @@ impl<'a> Sequencer<'a> {
         }
 
         match feed.write_to(w) {
-            Err(v) => {
+            Err(_v) => {
                 return Err(Error::WriteError);
             },
             Ok(_) => {

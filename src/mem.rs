@@ -45,8 +45,7 @@ impl MemCache {
 
 impl Cache for MemCache {
     fn open(&mut self, id: String) -> &mut dyn Write {
-        let mut w: CacheWriter;
-        let mut r: Option<&CacheWriter>;
+        let w: CacheWriter;
         if !self.files.contains_key(&id) {
             w = CacheWriter::new();
             self.files.insert(id.clone(), w);
@@ -54,7 +53,7 @@ impl Cache for MemCache {
         self.files.get_mut(&id).unwrap()
     }
 
-    fn close(&mut self, id: String) -> usize {
+    fn close(&mut self, _id: String) -> usize {
         return 0;
     }
 }

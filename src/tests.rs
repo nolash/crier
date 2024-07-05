@@ -1,6 +1,4 @@
 use std::clone::Clone;
-use std::fs::Metadata;
-use std::fs::metadata;
 use std::fs::File;
 
 use feed_rs::model::Entry;
