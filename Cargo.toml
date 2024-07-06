@@ -21,9 +21,11 @@ http = "^1.0"
 chrono = "^0.4"
 atom_syndication = "^0.12"
 uuid = "^1.9"
+itertools = "^0.13"
 
 [dev-dependencies]
 tempfile = "3.3.0"
+mediatype = "^0.19"
 
 [features]
 fs = []

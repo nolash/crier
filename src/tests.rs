@@ -2,6 +2,8 @@ use std::clone::Clone;
 use std::fs::File;
 
 use feed_rs::model::Entry;
+use feed_rs::model::Text;
+use mediatype::MediaTypeBuf;
 use chrono::DateTime;
 use tempfile::NamedTempFile;
 use tempfile::TempDir;
@@ -115,6 +117,61 @@ fn test_feed_write_extcache() {
     f = NamedTempFile::new().unwrap();
     fr = f.reopen().unwrap();
     r = seq.write_to(f).unwrap();
+
     assert_eq!(r, 15);
     assert_eq!(fr.metadata().unwrap().len(), 254);
+}
+
+#[test]
+#[cfg(feature = "fs")]
+fn test_sequence_order() {
+    let mut seq = Sequencer::new();
+    let mut entry: Entry;
+    let mut s: String;
+    let mut r: Vec<u8>;
+
+    entry = Entry::default();
+    entry.id = String::from("g");
+    s = String::from("inky");
+    entry.title = Some(Text{
+        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
+        src: Some(s.clone()),
+        content: s,
+        
+    });
+    entry.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
+    seq.add(entry);
+
+
+    entry = Entry::default();
+    entry.id = String::from("b");
+    s = String::from("pinky");
+    entry.title = Some(Text{
+        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
+        src: Some(s.clone()),
+        content: s,
+        
+    });
+    entry.published = Some(DateTime::parse_from_rfc3339("2023-06-25T20:46:00+02:00").unwrap().into());
+    seq.add(entry);
+
+    entry = Entry::default();
+    entry.id = String::from("a");
+    s = String::from("blinky");
+    entry.title = Some(Text{
+        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
+        src: Some(s.clone()),
+        content: s,
+        
+    });
+    entry.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
+    seq.add(entry);
+
+    // TODO find value where sort digest is reverse of lexical id
+    r = seq.next().unwrap();
+    assert_eq!(r, Vec::from("b"));
+    r = seq.next().unwrap();
+    assert_eq!(r, Vec::from("g")); 
+    r = seq.next().unwrap();
+    assert_eq!(r, Vec::from("a"));
 }

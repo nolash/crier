@@ -11,6 +11,7 @@ use rs_sha512::Sha512Hasher;
 //use chrono::DateTime;
 use chrono::Local;
 use atom_syndication::Feed as OutFeed;
+use itertools::Itertools;
 
 mod meta;
 mod io;
@@ -146,7 +147,7 @@ impl<'a> Iterator for Sequencer<'a> {
 
         if self.limit == 0 {
             self.item_keys = Vec::new();
-            for k in  self.items.keys() {
+            for k in  self.items.keys().sorted() {
                 self.item_keys.push(k.clone());
                 self.limit += 1;
             }
