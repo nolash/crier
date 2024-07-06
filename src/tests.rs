@@ -131,7 +131,7 @@ fn test_sequence_order() {
     let mut r: Vec<u8>;
 
     entry = Entry::default();
-    entry.id = String::from("g");
+    entry.id = String::from("y");
     s = String::from("inky");
     entry.title = Some(Text{
         content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
@@ -156,7 +156,7 @@ fn test_sequence_order() {
     seq.add(entry);
 
     entry = Entry::default();
-    entry.id = String::from("a");
+    entry.id = String::from("d");
     s = String::from("blinky");
     entry.title = Some(Text{
         content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
@@ -167,11 +167,26 @@ fn test_sequence_order() {
     entry.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
     seq.add(entry);
 
+    entry = Entry::default();
+    entry.id = String::from("a");
+    s = String::from("clyde");
+    entry.title = Some(Text{
+        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
+        src: Some(s.clone()),
+        content: s,
+        
+    });
+    entry.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
+    seq.add(entry);
+
+
     // TODO find value where sort digest is reverse of lexical id
     r = seq.next().unwrap();
     assert_eq!(r, Vec::from("b"));
     r = seq.next().unwrap();
-    assert_eq!(r, Vec::from("g")); 
+    assert_eq!(r, Vec::from("d"));
     r = seq.next().unwrap();
-    assert_eq!(r, Vec::from("a"));
+    assert_eq!(r, Vec::from("y")); 
+    r = seq.next().unwrap();
+    assert_eq!(r, Vec::from("a")); 
 }
