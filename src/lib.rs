@@ -15,10 +15,11 @@ use atom_syndication::Feed as OutFeed;
 mod meta;
 mod io;
 mod mem;
+mod cache;
 use meta::FeedMetadata;
 //use mem::MemCache;
 use mem::CacheWriter;
-use mem::Cache;
+use cache::Cache;
 
 #[derive(Debug)]
 pub enum Error {

@@ -9,7 +9,7 @@ use super::Sequencer;
 use super::io::FeedGet;
 
 #[cfg(feature = "fs")]
-use super::io::fs::Fs;
+use crate::io::fs::FsFeed;
 
 
 #[test]
@@ -40,7 +40,7 @@ fn test_entry_guard() {
 #[cfg(feature = "fs")]
 fn test_feed_get() {
     let r: bool;
-    let fs = Fs{};
+    let fs = FsFeed{};
     let feed = fs.get("testdata/test.atom.xml", None).unwrap();
     let mut seq = Sequencer::new();
     r = seq.add(feed.entries.get(0).unwrap().clone()); 
@@ -51,7 +51,7 @@ fn test_feed_get() {
 #[cfg(feature = "fs")]
 fn test_feed_all() {
     let r: i64;
-    let fs = Fs{};
+    let fs = FsFeed{};
     let feed = fs.get("testdata/test.atom.xml", None).unwrap();
     let mut seq = Sequencer::new();
     r = seq.add_from(feed); 
@@ -62,7 +62,7 @@ fn test_feed_all() {
 #[cfg(feature = "fs")]
 fn test_feed_mix() {
     let mut r: i64;
-    let fs = Fs{};
+    let fs = FsFeed{};
     let mut feed = fs.get("testdata/test.atom.xml", None).unwrap();
     let mut seq = Sequencer::new();
     r = seq.add_from(feed); 
@@ -78,7 +78,7 @@ fn test_feed_mix() {
 #[cfg(feature = "fs")]
 fn test_feed_write() {
     let r: usize;
-    let fs = Fs{};
+    let fs = FsFeed{};
     let f: NamedTempFile;
     let fr: File;
 
@@ -91,3 +91,26 @@ fn test_feed_write() {
     assert_eq!(r, 15);
     assert_eq!(fr.metadata().unwrap().len(), 254);
 }
+
+//#[test]
+//#[cfg(feature = "fs")]
+//fn test_feed_write_extcache() {
+//    let r: usize;
+//    let fs = FsFeed{};
+//    let mut f: NamedTempFile;
+//    let fw: File;
+//    let fr: File;
+//
+//    f = NamedTempFile::new().unwrap();
+//    fw = f.reopen().unwrap();
+//
+//    let feed = fs.get("testdata/test.atom.xml", None).unwrap();
+//    let mut seq = Sequencer::new().with_cache(&mut fw);
+//
+//    seq.add_from(feed); 
+//    f = NamedTempFile::new().unwrap();
+//    fr = f.reopen().unwrap();
+//    r = seq.write_to(f).unwrap();
+//    assert_eq!(r, 15);
+//    assert_eq!(fr.metadata().unwrap().len(), 254);
+//}

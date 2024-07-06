@@ -2,10 +2,8 @@ use std::collections::HashMap;
 use std::io::Write;
 use std::io::Error;
 
-pub trait Cache {
-    fn open(&mut self, id: String) -> &mut dyn Write;
-    fn close(&mut self, id: String) -> usize;
-}
+use crate::cache::Cache;
+
 
 pub struct CacheWriter {
     data: Vec<u8>,
