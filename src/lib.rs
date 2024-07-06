@@ -3,7 +3,8 @@ use std::hash::Hasher;
 use std::hash::Hash;
 use std::iter::Iterator;
 use std::io::Write;
-//use std::error::Error as StdError;
+use std::fmt::Debug;
+use std::io::BufWriter;
 
 use feed_rs::model::Entry;
 use feed_rs::model::Feed;
@@ -11,6 +12,7 @@ use rs_sha512::Sha512Hasher;
 //use chrono::DateTime;
 use chrono::Local;
 use atom_syndication::Feed as OutFeed;
+use atom_syndication::Entry as OutEntry;
 use itertools::Itertools;
 
 mod meta;
@@ -18,7 +20,6 @@ mod io;
 mod mem;
 mod cache;
 use meta::FeedMetadata;
-//use mem::MemCache;
 use mem::CacheWriter;
 use cache::Cache;
 
@@ -41,6 +42,7 @@ pub struct Sequencer<'a> {
 pub struct SequencerEntry {
     pub digest: u64,
     entry: Entry,
+    out: Vec<u8>,
 }
 
 impl<'a> Sequencer<'a> {
@@ -176,6 +178,7 @@ impl SequencerEntry {
         let mut o = SequencerEntry {
             entry: entry,
             digest: 0,
+            out: Vec::new(),
         };
 
         have_date = false;
@@ -213,7 +216,19 @@ impl SequencerEntry {
 
 impl Into<Vec<u8>> for SequencerEntry {
     fn into(self) -> Vec<u8> {
-        return String::from(self.entry.id).into_bytes();
+        let mut out_entry: OutEntry;
+        let mut b: Vec<u8>;
+        let mut w: BufWriter<Vec<u8>>;
+
+        out_entry = OutEntry::default();
+        out_entry.set_id(self.entry.id);
+        out_entry.set_title(self.entry.title.unwrap().content);
+
+        b = Vec::new();
+        w = BufWriter::new(b);
+        w = out_entry.write_to(w).unwrap();
+        b = Vec::from(w.buffer());
+        b
     }
 }
 

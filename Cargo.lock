@@ -38,8 +38,7 @@ dependencies = [
 [[package]]
 name = "atom_syndication"
 version = "0.12.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2f34613907f31c9dbef0240156db3c9263f34842b6e1a8999d2304ea62c8a30"
+source = "git+git://holbrook.no/contrib/atom_syndication?branch=lash/entry-to-xml#a18b2d44e6ea8cf397d85b2d7f360db029fe80ee"
 dependencies = [
  "chrono",
  "derive_builder",
@@ -157,8 +156,10 @@ dependencies = [
  "http",
  "itertools",
  "mediatype",
+ "quick-xml",
  "rs_sha512",
  "rss",
+ "serde",
  "tempfile",
  "uuid",
 ]
@@ -499,6 +500,7 @@ checksum = "1004a344b30a54e2ee58d66a71b32d2db2feb0a31f9a2d302bf0536f15de2a33"
 dependencies = [
  "encoding_rs",
  "memchr",
+ "serde",
 ]
 
 [[package]]
