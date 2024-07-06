@@ -4,9 +4,11 @@ use std::fs::File;
 use feed_rs::model::Entry;
 use chrono::DateTime;
 use tempfile::NamedTempFile;
+use tempfile::TempDir;
 
-use super::Sequencer;
-use super::io::FeedGet;
+use crate::Sequencer;
+use crate::io::FeedGet;
+use crate::io::fs::FsCache;
 
 #[cfg(feature = "fs")]
 use crate::io::fs::FsFeed;
@@ -92,25 +94,27 @@ fn test_feed_write() {
     assert_eq!(fr.metadata().unwrap().len(), 254);
 }
 
-//#[test]
-//#[cfg(feature = "fs")]
-//fn test_feed_write_extcache() {
-//    let r: usize;
-//    let fs = FsFeed{};
-//    let mut f: NamedTempFile;
-//    let fw: File;
-//    let fr: File;
-//
-//    f = NamedTempFile::new().unwrap();
-//    fw = f.reopen().unwrap();
-//
-//    let feed = fs.get("testdata/test.atom.xml", None).unwrap();
-//    let mut seq = Sequencer::new().with_cache(&mut fw);
-//
-//    seq.add_from(feed); 
-//    f = NamedTempFile::new().unwrap();
-//    fr = f.reopen().unwrap();
-//    r = seq.write_to(f).unwrap();
-//    assert_eq!(r, 15);
-//    assert_eq!(fr.metadata().unwrap().len(), 254);
-//}
+#[test]
+#[cfg(feature = "fs")]
+fn test_feed_write_extcache() {
+    let r: usize;
+    let fs = FsFeed{};
+    let d: TempDir;
+    let f: NamedTempFile;
+    let fr: File;
+    let mut cache: FsCache;
+
+    d = TempDir::new().unwrap();
+    cache = FsCache::new(d.into_path());
+        
+    let feed = fs.get("testdata/test.atom.xml", None).unwrap();
+    let mut seq = Sequencer::new();
+    seq = seq.with_cache(&mut cache);
+
+    seq.add_from(feed); 
+    f = NamedTempFile::new().unwrap();
+    fr = f.reopen().unwrap();
+    r = seq.write_to(f).unwrap();
+    assert_eq!(r, 15);
+    assert_eq!(fr.metadata().unwrap().len(), 254);
+}

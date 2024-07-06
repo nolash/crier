@@ -60,7 +60,7 @@ impl<'a> Sequencer<'a> {
         o
     }
 
-    pub fn with_cache(&mut self, w: &'a mut impl Cache) -> &Sequencer<'a> {
+    pub fn with_cache(mut self, w: &'a mut impl Cache) -> Sequencer<'a> {
         self.cache = Some(w);
         return self;
     }
