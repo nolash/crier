@@ -38,13 +38,13 @@ dependencies = [
 [[package]]
 name = "atom_syndication"
 version = "0.12.3"
-source = "git+git://holbrook.no/contrib/atom_syndication?rev=fab6f733f6481ecfcbd6a76074f1038c79c854ae#fab6f733f6481ecfcbd6a76074f1038c79c854ae"
+source = "git+git://holbrook.no/contrib/atom_syndication?rev=9985c1610b2b819f5bd2f7a719567ee0b5419b85#9985c1610b2b819f5bd2f7a719567ee0b5419b85"
 dependencies = [
  "chrono",
  "derive_builder",
  "diligent-date-parser",
  "never",
- "quick-xml",
+ "quick-xml 0.32.0",
 ]
 
 [[package]]
@@ -156,7 +156,7 @@ dependencies = [
  "http",
  "itertools",
  "mediatype",
- "quick-xml",
+ "quick-xml 0.31.0",
  "rs_sha512",
  "rss",
  "serde",
@@ -298,7 +298,7 @@ checksum = "be5366c3d4ae865540354ecafa0e5b41dd56c2f31d0b2ef876669edf964daaec"
 dependencies = [
  "chrono",
  "mediatype",
- "quick-xml",
+ "quick-xml 0.31.0",
  "regex",
  "serde",
  "serde_json",
@@ -503,6 +503,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "quick-xml"
+version = "0.32.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d3a6e5838b60e0e8fa7a43f22ade549a37d61f8bdbe636d0d7816191de969c2"
+dependencies = [
+ "encoding_rs",
+ "memchr",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -597,7 +607,7 @@ dependencies = [
  "atom_syndication",
  "derive_builder",
  "never",
- "quick-xml",
+ "quick-xml 0.31.0",
 ]
 
 [[package]]

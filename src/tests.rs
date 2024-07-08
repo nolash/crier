@@ -1,5 +1,6 @@
 use std::clone::Clone;
 use std::fs::File;
+use std::io::{SeekFrom, Seek, Read};
 use std::str;
 
 use feed_rs::model::Entry;
@@ -26,7 +27,7 @@ fn check_xml_title(xml: Vec<u8>, title: &str) {
     let mut state = 0;
     loop {
         match rxml.read_event_into(&mut xmlbuf) {
-            Err(e) => panic!("cant read back xml"),
+            Err(e) => panic!("cant read back xml: {:?}", e),
             Ok(XMLEvent::Eof) => break,
             Ok(XMLEvent::Start(v)) => {
                 match v.name().as_ref() {
@@ -144,7 +145,8 @@ fn test_feed_write() {
     let r: usize;
     let fs = FsFeed{};
     let f: NamedTempFile;
-    let fr: File;
+    let mut fr: File;
+    //let mut b: [0; 10240];
 
     let feed = fs.get("testdata/test.atom.xml", None).unwrap();
     let mut seq = Sequencer::new();
@@ -153,7 +155,11 @@ fn test_feed_write() {
     fr = f.reopen().unwrap();
     r = seq.write_to(f).unwrap();
     assert_eq!(r, 15);
-    assert_eq!(fr.metadata().unwrap().len(), 254);
+//    let mut b = String::new();
+//    fr.seek(SeekFrom::Start(0));
+//    fr.read_to_string(&mut b);
+//    println!("{:?}", b);
+    assert_eq!(fr.metadata().unwrap().len(), 2521);
 }
 
 #[test]
@@ -179,7 +185,7 @@ fn test_feed_write_extcache() {
     r = seq.write_to(f).unwrap();
 
     assert_eq!(r, 15);
-    assert_eq!(fr.metadata().unwrap().len(), 254);
+    assert_eq!(fr.metadata().unwrap().len(), 2521);
 }
 
 #[test]

@@ -5,6 +5,7 @@ use std::iter::Iterator;
 use std::io::Write;
 use std::fmt::Debug;
 use std::io::BufWriter;
+use std::str::FromStr;
 
 use feed_rs::model::Entry;
 use feed_rs::model::Feed;
@@ -26,6 +27,7 @@ use cache::Cache;
 #[derive(Debug)]
 pub enum Error {
     WriteError,
+    CacheError,
 }
 
 
@@ -112,6 +114,9 @@ impl<'a> Sequencer<'a> {
     fn write_to(&mut self, w: impl Write) -> Result<usize, Error> {
         let mut r: usize;
         let mut feed = OutFeed::default();
+        let mut entry: OutEntry;
+        let mut entries: Vec<OutEntry>;
+        let mut b: &str;
         feed.set_id("urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6");
         feed.set_updated(Local::now().to_utc());
 
@@ -121,8 +126,24 @@ impl<'a> Sequencer<'a> {
             },
             Ok(_) => {
             },
-
         }
+
+        entries = Vec::new();
+        r = 0;
+        for v in self {
+            b = std::str::from_utf8(v.as_slice()).unwrap();
+            match OutEntry::from_str(b) {
+                Err(e) => {
+                    println!("fromstrerr {:?}", e);
+                    return Err(Error::CacheError);
+                },
+                Ok(o) => {
+                    entries.push(o);
+                },
+            }
+            r += 1;
+        }
+        feed.set_entries(entries);
 
         match feed.write_to(w) {
             Err(_v) => {
@@ -130,11 +151,6 @@ impl<'a> Sequencer<'a> {
             },
             Ok(_) => {
             },
-        }
-
-        r = 0;
-        for v in self {
-            r += 1;
         }
 
         Ok(r)
