@@ -1,5 +1,6 @@
 use std::clone::Clone;
 use std::fs::File;
+use std::str;
 
 use feed_rs::model::Entry;
 use feed_rs::model::Text;
@@ -8,6 +9,8 @@ use chrono::DateTime;
 use tempfile::NamedTempFile;
 use tempfile::TempDir;
 use atom_syndication::Entry as OutEntry;
+use quick_xml::Reader as XMLReader;
+use quick_xml::events::Event as XMLEvent;
 
 use crate::Sequencer;
 use crate::io::FeedGet;
@@ -17,54 +20,85 @@ use crate::io::fs::FsCache;
 use crate::io::fs::FsFeed;
 
 
-//#[test]
-//fn test_entry_guard() {
-//    let mut r: bool;
-//    let mut seq = Sequencer::new();
-//    let mut src = Entry::default();
-//    let mut s: String;
-//
-//    src.id = String::from("foo");
-//    s = String::from("inky");
-//    src.title = Some(Text{
-//        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
-//        src: Some(s.clone()),
-//        content: s,
-//        
-//    });
-//
-//    //src.published = Some(DateTime::<Utc>::default());
-//    src.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
-//    r = seq.add(src);
-//    assert!(r);
-//
-//    let mut src_two = Entry::default();
-//    src_two.id = String::from("foo");
-//    s = String::from("pinky");
-//    src_two.title = Some(Text{
-//        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
-//        src: Some(s.clone()),
-//        content: s,
-//        
-//    });
-//    src_two.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
-//    r = seq.add(src_two);
-//    assert!(!r);
-//
-//    let mut src_three = Entry::default();
-//    src_three.id = String::from("foo");
-//    s = String::from("blinky");
-//    src_three.title = Some(Text{
-//        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
-//        src: Some(s.clone()),
-//        content: s,
-//        
-//    });
-//
-//    src_three.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+03:00").unwrap().into());
-//    r = seq.add(src_three);
-//    assert!(r);
-//}
+fn check_xml_title(xml: Vec<u8>, title: &str) {
+    let mut rxml = XMLReader::from_str(str::from_utf8(&xml).unwrap());
+    let mut xmlbuf = Vec::new();
+    let mut state = 0;
+    loop {
+        match rxml.read_event_into(&mut xmlbuf) {
+            Err(e) => panic!("cant read back xml"),
+            Ok(XMLEvent::Eof) => break,
+            Ok(XMLEvent::Start(v)) => {
+                match v.name().as_ref() {
+                    b"title" => {
+                        state = 1;
+                    },
+                    _ => {
+                        state = 0
+                    },
+                }
+            },
+            Ok(XMLEvent::End(v)) => {
+                state = 0;
+            },
+            Ok(XMLEvent::Text(v)) => {
+                if state > 0 {
+                    assert_eq!(v.unescape().unwrap(), title);
+                }
+            },
+            _ => (),
+        }
+    }
+}
+
+#[test]
+fn test_entry_guard() {
+    let mut r: bool;
+    let mut seq = Sequencer::new();
+    let mut src = Entry::default();
+    let mut s: String;
+
+    src.id = String::from("foo");
+    s = String::from("inky");
+    src.title = Some(Text{
+        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
+        src: Some(s.clone()),
+        content: s,
+        
+    });
+
+    //src.published = Some(DateTime::<Utc>::default());
+    src.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
+    r = seq.add(src);
+    assert!(r);
+
+    let mut src_two = Entry::default();
+    src_two.id = String::from("foo");
+    s = String::from("pinky");
+    src_two.title = Some(Text{
+        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
+        src: Some(s.clone()),
+        content: s,
+        
+    });
+    src_two.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
+    r = seq.add(src_two);
+    assert!(!r);
+
+    let mut src_three = Entry::default();
+    src_three.id = String::from("foo");
+    s = String::from("blinky");
+    src_three.title = Some(Text{
+        content_type: MediaTypeBuf::from_string(String::from("text/plain")).unwrap(),
+        src: Some(s.clone()),
+        content: s,
+        
+    });
+
+    src_three.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+03:00").unwrap().into());
+    r = seq.add(src_three);
+    assert!(r);
+}
 
 #[test]
 #[cfg(feature = "fs")]
@@ -209,11 +243,13 @@ fn test_sequence_order() {
 
     // TODO find value where sort digest is reverse of lexical id
     r = seq.next().unwrap();
-//    assert_eq!(r, Vec::from("b"));
-//    r = seq.next().unwrap();
-//    assert_eq!(r, Vec::from("d"));
-//    r = seq.next().unwrap();
-//    assert_eq!(r, Vec::from("y")); 
-//    r = seq.next().unwrap();
-//    assert_eq!(r, Vec::from("a")); 
+    check_xml_title(r, "pinky");
+    r = seq.next().unwrap();
+    check_xml_title(r, "blinky");
+    r = seq.next().unwrap();
+    check_xml_title(r, "inky");
+    r = seq.next().unwrap();
+    check_xml_title(r, "clyde");
 }
+
+

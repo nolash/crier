@@ -23,17 +23,18 @@ itertools = "^0.13"
 serde = "^1.0"
 atom_syndication = "^0.12"
 
-[dependencies.quick-xml]
-version = "^0.31"
-features = ["serialize"]
+#[dependencies.quick-xml]
+#version = "^0.31"
+#features = ["serialize"]
 
 [patch.crates-io]
 #atom_syndication = { path = "/home/lash/src/contrib/atom_syndication" }
-atom_syndication = { git = "git://holbrook.no/contrib/atom_syndication", branch="lash/entry-to-xml" }
+atom_syndication = { git = "git://holbrook.no/contrib/atom_syndication", rev="fab6f733f6481ecfcbd6a76074f1038c79c854ae" } #branch="lash/entry-to-xml" }
 
 [dev-dependencies]
 tempfile = "3.3.0"
 mediatype = "^0.19"
+quick-xml = "^0.31"
 
 [features]
 fs = []

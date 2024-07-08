@@ -38,7 +38,7 @@ dependencies = [
 [[package]]
 name = "atom_syndication"
 version = "0.12.3"
-source = "git+git://holbrook.no/contrib/atom_syndication?branch=lash/entry-to-xml#a18b2d44e6ea8cf397d85b2d7f360db029fe80ee"
+source = "git+git://holbrook.no/contrib/atom_syndication?rev=fab6f733f6481ecfcbd6a76074f1038c79c854ae#fab6f733f6481ecfcbd6a76074f1038c79c854ae"
 dependencies = [
  "chrono",
  "derive_builder",
@@ -500,7 +500,6 @@ checksum = "1004a344b30a54e2ee58d66a71b32d2db2feb0a31f9a2d302bf0536f15de2a33"
 dependencies = [
  "encoding_rs",
  "memchr",
- "serde",
 ]
 
 [[package]]
