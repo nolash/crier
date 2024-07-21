@@ -14,6 +14,12 @@ use rs_sha512::Sha512Hasher;
 use chrono::Local;
 use atom_syndication::Feed as OutFeed;
 use atom_syndication::Entry as OutEntry;
+use atom_syndication::TextType as OutTextType;
+use atom_syndication::Text as OutText;
+use atom_syndication::Content as OutContent;
+use atom_syndication::Person as OutPerson;
+use atom_syndication::Category as OutCategory;
+use atom_syndication::FixedDateTime;
 use itertools::Itertools;
 
 mod meta;
@@ -228,20 +234,112 @@ impl SequencerEntry {
         o.digest += id_part as u64;
         o
     }
+
+    /// TODO: get size heuristics from already written values (either that or replace underlying
+    /// in-memory writer implementation with something that doesnt wrap on flush.
+    fn to_writer(&self, v: Vec<u8>) -> BufWriter<Vec<u8>> {
+        BufWriter::with_capacity(10241024, v)
+    }
 }
 
+/// TODO: split out field translations to separate module
 impl Into<Vec<u8>> for SequencerEntry {
     fn into(self) -> Vec<u8> {
         let mut out_entry: OutEntry;
         let mut b: Vec<u8>;
         let mut w: BufWriter<Vec<u8>>;
+        let o: &SequencerEntry;
+
+        o = &self;
+        b = Vec::new();
+        w = o.to_writer(b);
 
         out_entry = OutEntry::default();
         out_entry.set_id(self.entry.id);
         out_entry.set_title(self.entry.title.unwrap().content);
 
-        b = Vec::new();
-        w = BufWriter::new(b);
+        let mut d = FixedDateTime::parse_from_rfc2822(self.entry.published.unwrap().to_rfc2822().as_str()).unwrap();
+        out_entry.set_published(Some(d.clone()));
+
+        match self.entry.updated {
+            Some(v) => {
+                d = FixedDateTime::parse_from_rfc2822(v.to_rfc2822().as_str()).unwrap();
+                out_entry.set_updated(d.clone());
+            },
+            None => {},
+        }
+
+        match self.entry.summary {
+            Some(v) => {
+                let text_out: OutText;
+                let summary_out_type: OutTextType;
+                let summary_subtype = String::from(v.content_type.subty().as_str());
+                if summary_subtype.contains("xhtml") {
+                    summary_out_type = OutTextType::Xhtml;
+                } else if summary_subtype.contains("html") {
+                    summary_out_type = OutTextType::Html;
+                } else {
+                    summary_out_type = OutTextType::Text;
+                }
+                text_out = OutText{
+                    value: v.content,
+                    r#type: summary_out_type,
+                    base: None,
+                    lang: None,
+                };
+                out_entry.set_summary(Some(text_out));
+            },
+            None => {},
+        }
+
+        match self.entry.content {
+            Some(v) => {
+                let mut content_out = OutContent::default();
+                content_out.content_type = Some(String::from(v.content_type.as_str()));
+                match v.src {
+                    Some(vv) => {
+                        content_out.src = Some(vv.href);
+                    },
+                    None => {},
+                };
+                match v.body {
+                    Some(vv) => {
+                        content_out.value = Some(vv);
+                    },
+                    None => {},
+                };
+                out_entry.set_content(Some(content_out));
+            },
+            None => {},
+        }
+
+        for v in self.entry.authors {
+            let o = OutPerson{
+                name: v.name,
+                uri: v.uri,
+                email: v.email,
+            };
+            out_entry.authors.push(o);
+        }
+
+        for v in self.entry.contributors {
+            let o = OutPerson{
+                name: v.name,
+                uri: v.uri,
+                email: v.email,
+            };
+            out_entry.contributors.push(o);
+        }
+
+        for v in self.entry.categories {
+            let o = OutCategory {
+                term: v.term,
+                scheme: v.scheme,
+                label: v.label,
+            };
+            out_entry.categories.push(o);
+        }
+
         w = out_entry.write_to(w).unwrap();
         b = Vec::from(w.buffer());
         b

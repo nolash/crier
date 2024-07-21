@@ -8,7 +8,7 @@ use feed_rs::model::Text;
 use mediatype::MediaTypeBuf;
 use chrono::DateTime;
 use tempfile::NamedTempFile;
-use tempfile::TempDir;
+use tempfile::tempdir;
 use atom_syndication::Entry as OutEntry;
 use quick_xml::Reader as XMLReader;
 use quick_xml::events::Event as XMLEvent;
@@ -68,7 +68,6 @@ fn test_entry_guard() {
         
     });
 
-    //src.published = Some(DateTime::<Utc>::default());
     src.published = Some(DateTime::parse_from_rfc3339("2024-06-25T20:46:00+02:00").unwrap().into());
     r = seq.add(src);
     assert!(r);
@@ -120,7 +119,7 @@ fn test_feed_all() {
     let feed = fs.get("testdata/test.atom.xml", None).unwrap();
     let mut seq = Sequencer::new();
     r = seq.add_from(feed); 
-    assert_eq!(r, 15);
+    assert_eq!(r, 16);
 }
 
 #[test]
@@ -131,12 +130,12 @@ fn test_feed_mix() {
     let mut feed = fs.get("testdata/test.atom.xml", None).unwrap();
     let mut seq = Sequencer::new();
     r = seq.add_from(feed); 
-    assert_eq!(r, 15);
+    assert_eq!(r, 16);
     feed = fs.get("testdata/test2.xml", None).unwrap();
     r = seq.add_from(feed); 
     assert_eq!(r, 10);
-    assert_eq!(seq.by_ref().count(), 25);
-    assert_eq!(seq.count(), 25);
+    assert_eq!(seq.by_ref().count(), 26);
+    assert_eq!(seq.count(), 26);
 }
 
 #[test]
@@ -146,7 +145,6 @@ fn test_feed_write() {
     let fs = FsFeed{};
     let f: NamedTempFile;
     let mut fr: File;
-    //let mut b: [0; 10240];
 
     let feed = fs.get("testdata/test.atom.xml", None).unwrap();
     let mut seq = Sequencer::new();
@@ -154,12 +152,8 @@ fn test_feed_write() {
     f = NamedTempFile::new().unwrap();
     fr = f.reopen().unwrap();
     r = seq.write_to(f).unwrap();
-    assert_eq!(r, 15);
-//    let mut b = String::new();
-//    fr.seek(SeekFrom::Start(0));
-//    fr.read_to_string(&mut b);
-//    println!("{:?}", b);
-    assert_eq!(fr.metadata().unwrap().len(), 2521);
+    assert_eq!(r, 16);
+    assert_eq!(fr.metadata().unwrap().len(), 519536);
 }
 
 #[test]
@@ -167,25 +161,24 @@ fn test_feed_write() {
 fn test_feed_write_extcache() {
     let r: usize;
     let fs = FsFeed{};
-    let d: TempDir;
     let f: NamedTempFile;
     let fr: File;
     let mut cache: FsCache;
 
-    d = TempDir::new().unwrap();
+    let d = tempdir().unwrap();
     cache = FsCache::new(d.into_path());
         
     let feed = fs.get("testdata/test.atom.xml", None).unwrap();
     let mut seq = Sequencer::new();
     seq = seq.with_cache(&mut cache);
 
-    seq.add_from(feed); 
+    seq.add_from(feed);
     f = NamedTempFile::new().unwrap();
     fr = f.reopen().unwrap();
     r = seq.write_to(f).unwrap();
 
-    assert_eq!(r, 15);
-    assert_eq!(fr.metadata().unwrap().len(), 2521);
+    assert_eq!(r, 16);
+    assert_eq!(fr.metadata().unwrap().len(), 519536);
 }
 
 #[test]
@@ -195,7 +188,6 @@ fn test_sequence_order() {
     let mut entry: Entry;
     let mut s: String;
     let mut r: Vec<u8>;
-    //let mut r: OutEntry;
 
     entry = Entry::default();
     entry.id = String::from("y");
@@ -257,5 +249,3 @@ fn test_sequence_order() {
     r = seq.next().unwrap();
     check_xml_title(r, "clyde");
 }
-
-

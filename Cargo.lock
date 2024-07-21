@@ -38,7 +38,6 @@ dependencies = [
 [[package]]
 name = "atom_syndication"
 version = "0.12.3"
-source = "git+git://holbrook.no/contrib/atom_syndication?rev=9985c1610b2b819f5bd2f7a719567ee0b5419b85#9985c1610b2b819f5bd2f7a719567ee0b5419b85"
 dependencies = [
  "chrono",
  "derive_builder",

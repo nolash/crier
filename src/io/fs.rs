@@ -44,14 +44,20 @@ impl Cache for FsCache {
     fn open(&mut self, id: String) -> &mut dyn Write {
         let p: &Path;
         let fp: PathBuf;
-        let s: &str;
+        let mut s: String;
+        let mut ids: String;
         let mut f: File;
 
         if !self.files.contains_key(&id) {
             p = Path::new(self.dir.as_path());
-            fp = p.join(id.clone());
-            s = fp.to_str().unwrap();
-            f = File::create(s).unwrap();
+       
+            ids = id.clone();
+            ids = ids.replace("/", "%2F");
+            ids = ids.replace("\\", "%5C");
+
+            fp = p.join(ids);
+            s = String::from(fp.to_str().unwrap());
+            f = File::create(s.as_str()).unwrap();
             self.files.insert(id.clone(), f);
         }
         return self.files.get_mut(&id).unwrap();

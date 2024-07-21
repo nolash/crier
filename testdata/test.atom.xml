@@ -1,5 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>man bytes gnu</title><link href="/" rel="alternate"></link><link href="feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2024-06-25T21:58:00+02:00</updated><entry><title>Secrets in the shell</title><link href="clortho.html" rel="alternate"></link><published>2024-06-25T20:46:00+02:00</published><updated>2024-06-25T21:58:00+02:00</updated><author><name>Louis Holbrook</name></author><id>tag:None,2024-06-25:clortho.html</id><summary type="html">&lt;p class="first last"&gt;A key value store at your fingertips&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>man bytes gnu</title><link href="/" rel="alternate"></link><link href="feeds/all.atom.xml" rel="self"></link><id>/</id><updated>2024-07-07T21:03:40+02:00</updated><entry><title>Support Your Local Viewer</title><link href="local-markdown.html" rel="alternate"></link><published>2024-07-07T21:03:40+02:00</published><updated>2024-07-07T21:03:40+02:00</updated><author><name>Louis Holbrook</name></author><id>tag:None,2024-07-07:local-markdown.html</id><summary type="html">&lt;p class="first last"&gt;Bash script to render and spawn a viewer for markdown files&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;Markdown is the fast-food of document formats.&lt;/p&gt;
+&lt;p&gt;That doesn't change the fact that it's everywhere.&lt;/p&gt;
+&lt;p&gt;So much everywhere, in fact, that it's kind of puzzling there is not a dedicated tool around to view it.&lt;/p&gt;
+&lt;div class="section" id="pinning-down-markdown"&gt;
+&lt;h2&gt;Pinning down markdown&lt;/h2&gt;
+&lt;p&gt;There is no shortage of applications that &lt;em&gt;can&lt;/em&gt; render markdown. Among the alternatives are free code editors like &lt;a class="reference external" href="https://atom-editor.cc/"&gt;Atom&lt;/a&gt; or &lt;a class="reference external" href="https://plugins.geany.org/markdown.html"&gt;Geany&lt;/a&gt;, the browser plugin &lt;a class="reference external" href="https://chromewebstore.google.com/detail/markdown-viewer/ckkdlimhmcjmikdlpkmbgfkaikojcbjk"&gt;Markdown Viewer&lt;/a&gt; and even a dedicated markdown editor like &lt;a class="reference external" href="https://github.com/marktext/marktext"&gt;Marktext&lt;/a&gt;, &lt;a class="reference external" href="https://github.com/retext-project/retext"&gt;retext&lt;/a&gt; and &lt;a class="reference external" href="https://ghostwriter.kde.org/"&gt;ghostwriter&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;And of course, there exist SaaS offerings such as &lt;a class="reference external" href="https://hackmd.io"&gt;hackmd&lt;/a&gt;. But seeing as those are not alternatives for offline use, we don't concern ourselves with those here.&lt;/p&gt;
+&lt;p&gt;But what is the equivalent of &lt;a class="reference external" href="https://github.com/muennich/sxiv"&gt;sxiv&lt;/a&gt; or &lt;a class="reference external" href="https://feh.finalrewind.org"&gt;feh&lt;/a&gt; for Markdown?&lt;/p&gt;
+&lt;p&gt;Honestly, I couldn't find any such thing. If there is, I'd &lt;a class="reference external" href="https://holbrook.no/msg"&gt;love to know&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Fortunately, there is a perfectly reasonable workaround.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="step-by-step"&gt;
+&lt;h2&gt;Step by step&lt;/h2&gt;
+&lt;p&gt;After all, it is in the spirit of *nixes to use a choice of tools who &lt;em&gt;does one thing and does it well&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;So, no matter how bizarre it feels, it may make sense that a lurid format like &lt;em&gt;Markdown&lt;/em&gt; should be treated in a separate step to produce a more well-established - and less ambiguous - format.&lt;/p&gt;
+&lt;p&gt;I asked a related question on &lt;a class="reference external" href="https://tex.stackexchange.com/questions/341899/latex-to-markdown-converter"&gt;Stackexchange&lt;/a&gt; long ago, and there the &lt;tt class="docutils literal"&gt;pandoc&lt;/tt&gt; tool came up as a solution.&lt;/p&gt;
+&lt;p&gt;And it turns out it works beautifully in this case aswell.&lt;/p&gt;
+&lt;p&gt;Consider the following script:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;t&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;mktemp&lt;span class="w"&gt; &lt;/span&gt;--suffix&lt;span class="o"&gt;=&lt;/span&gt;.html&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="p"&gt;&amp;amp;&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nb"&gt;echo&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;
+pandoc&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;gfm&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;html&lt;span class="w"&gt; &lt;/span&gt;-M&lt;span class="w"&gt; &lt;/span&gt;document-css&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--standalone&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;/dev/null
+w3m&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Quite simply, we generate a standalone html file in &lt;tt class="docutils literal"&gt;tmpfs&lt;/tt&gt;, which in turn is read and renderered by a web browser.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="browsing-browsers"&gt;
+&lt;h2&gt;Browsing browsers&lt;/h2&gt;
+&lt;p&gt;No appreciation for &lt;a class="reference external" href="https://w3m.sourceforge.net"&gt;w3m&lt;/a&gt;, eh? Instead want that fuzzy feel of comforting colors, smooth scroll and fancy fonts?&lt;/p&gt;
+&lt;p&gt;I can understand. I used to suffer that affliction, too.&lt;/p&gt;
+&lt;p&gt;But nonetheless; it's an important point. For example, what if I wanted to use &lt;a class="reference external" href="https://lynx.browser.org"&gt;lynx&lt;/a&gt; or &lt;a class="reference external" href="https://fanglingsu.github.io/vimb"&gt;vimb&lt;/a&gt; instead? Choosing the browser to view with should definitely be the caller's call.&lt;/p&gt;
+&lt;p&gt;Is there a canonical way of doing that in Linux.&lt;/p&gt;
+&lt;p&gt;Kind of.&lt;/p&gt;
+&lt;p&gt;Let's review a couple of the options.&lt;/p&gt;
+&lt;div class="section" id="the-environmental-solution"&gt;
+&lt;h3&gt;The environmental solution&lt;/h3&gt;
+&lt;p&gt;Some applications honor the &lt;tt class="docutils literal"&gt;$BROWSER&lt;/tt&gt; environment variable. So let's cover for that:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;browser&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BROWSER&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="nv"&gt;w3m&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="nv"&gt;t&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;mktemp&lt;span class="w"&gt; &lt;/span&gt;--suffix&lt;span class="o"&gt;=&lt;/span&gt;.html&lt;span class="k"&gt;)&lt;/span&gt;
+pandoc&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;gfm&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;html&lt;span class="w"&gt; &lt;/span&gt;-M&lt;span class="w"&gt; &lt;/span&gt;document-css&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--standalone&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;/dev/null
+&lt;span class="nv"&gt;$browser&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Now, viewing the markdown file &lt;tt class="docutils literal"&gt;README.md&lt;/tt&gt; with &lt;tt class="docutils literal"&gt;lynx&lt;/tt&gt; is as easy as:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;&lt;span class="nv"&gt;BROWSER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;which&lt;span class="w"&gt; &lt;/span&gt;lynx&lt;span class="k"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;bash&lt;span class="w"&gt; &lt;/span&gt;wmd.sh&lt;span class="w"&gt; &lt;/span&gt;README.md
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-cross-solution"&gt;
+&lt;h3&gt;The cross solution&lt;/h3&gt;
+&lt;p&gt;So, have you heard about the Cross Desktop Group? &lt;a class="footnote-reference" href="#footnote-1" id="footnote-reference-1"&gt;[1]&lt;/a&gt; These are the guys you should be sending a thought of gratitude every time you intuitively look in your &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;~/.config&lt;/span&gt;&lt;/tt&gt; or &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;~/.local&lt;/span&gt;&lt;/tt&gt; folder for application data. And if you're a &lt;strong&gt;HUIf&lt;/strong&gt; &lt;a class="footnote-reference" href="#footnote-2" id="footnote-reference-2"&gt;[2]&lt;/a&gt; coder, chances are you have seen the string &lt;tt class="docutils literal"&gt;xdg&lt;/tt&gt; in some function call somewhere.&lt;/p&gt;
+&lt;p&gt;These days they go by the name &lt;a class="reference external" href="https://www.freedesktop.org/"&gt;Free Desktop Group&lt;/a&gt;, and among other things they have negotiated something particularly useful to us in this particular case.&lt;/p&gt;
+&lt;p&gt;To launch programs in a desktop environment in Linux, a &lt;a class="reference external" href="https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html"&gt;Desktop Entry Specification&lt;/a&gt; file format &lt;a class="footnote-reference" href="#footnote-3" id="footnote-reference-3"&gt;[3]&lt;/a&gt; has been defined - appropriately suffixed &lt;tt class="docutils literal"&gt;.desktop&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;Take a look at a random &lt;tt class="docutils literal"&gt;*.desktop&lt;/tt&gt; file in &lt;tt class="docutils literal"&gt;/usr/share/applications&lt;/tt&gt; (your most likely default &lt;tt class="docutils literal"&gt;$XDG_DATA_DIRS&lt;/tt&gt; location, where xdg searches for desktop files). Every one will contain an top-level &lt;tt class="docutils literal"&gt;Exec=&lt;/tt&gt; entry.&lt;/p&gt;
+&lt;p&gt;For example, my &lt;tt class="docutils literal"&gt;feh.desktop&lt;/tt&gt; entry has &lt;tt class="docutils literal"&gt;Exec=feh &lt;span class="pre"&gt;--start-at&lt;/span&gt; %u&lt;/tt&gt; which means find &lt;tt class="docutils literal"&gt;feh&lt;/tt&gt; in &lt;tt class="docutils literal"&gt;$PATH&lt;/tt&gt; and execute it with the &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;--start-at&lt;/span&gt;&lt;/tt&gt; switch and one single &lt;em&gt;url&lt;/em&gt; as argument:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;[Desktop Entry]&lt;/span&gt;
+&lt;span class="na"&gt;Name&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;Feh&lt;/span&gt;
+&lt;span class="na"&gt;Name[en_US]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;feh&lt;/span&gt;
+&lt;span class="na"&gt;GenericName&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;Image viewer&lt;/span&gt;
+&lt;span class="na"&gt;GenericName[en_US]&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;Image viewer&lt;/span&gt;
+&lt;span class="na"&gt;Comment&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;Image viewer and cataloguer&lt;/span&gt;
+&lt;span class="na"&gt;Exec&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;feh --start-at %u&lt;/span&gt;
+&lt;span class="na"&gt;Terminal&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;false&lt;/span&gt;
+&lt;span class="na"&gt;Type&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;Application&lt;/span&gt;
+&lt;span class="na"&gt;Icon&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;feh&lt;/span&gt;
+&lt;span class="na"&gt;Categories&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;Graphics&lt;/span&gt;&lt;span class="c1"&gt;;2DGraphics;Viewer;&lt;/span&gt;
+&lt;span class="na"&gt;MimeType&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;image/bmp&lt;/span&gt;&lt;span class="c1"&gt;;image/gif;image/jpeg;image/jpg;image/pjpeg;image/png;image/tiff;image/webp;image/x-bmp;image/x-pcx;image/x-png;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-portable-pixmap;image/x-tga;image/x-xbitmap;image/heic;&lt;/span&gt;
+&lt;span class="na"&gt;NoDisplay&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s"&gt;true&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Covering this case in our script:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;fallbackbrowsercmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;w3m
+&lt;span class="nv"&gt;browsercmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="c1"&gt;# if browser env exists, then&lt;/span&gt;
+&lt;span class="c1"&gt;# try handle it as a desktop entry&lt;/span&gt;
+&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;!&lt;span class="w"&gt; &lt;/span&gt;-z&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$BROWSER&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="c1"&gt;# find the xdg paths&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;XDG_DATA_DIRS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;XDG_DATA_DIRS&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="p"&gt;/usr/share&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;!&lt;span class="w"&gt; &lt;/span&gt;-z&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$XDG_DATA_HOME&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="nv"&gt;XDG_DATA_DIRS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$XDG_DATA_HOME&lt;/span&gt;:&lt;span class="nv"&gt;$XDG_DATA_DIRS&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="c1"&gt;# split on &amp;quot;:&amp;quot; and try dirs one by one&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="c1"&gt;# use first matching browser desktop entry&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;_ifs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$IFS&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;IFS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;:
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;dirs&lt;/span&gt;&lt;span class="o"&gt;=(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$XDG_DATA_DIRS&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;d&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$dirs&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="nv"&gt;s&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$BROWSER&lt;/span&gt;.desktop
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="nv"&gt;a&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$d&lt;/span&gt;/applications/&lt;span class="nv"&gt;$BROWSER&lt;/span&gt;.desktop
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="nv"&gt;browsercmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;gtk-launch &lt;/span&gt;&lt;span class="nv"&gt;$s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;done&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;IFS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="c1"&gt;# if no browser set or could not be found in xdg,&lt;/span&gt;
+&lt;span class="c1"&gt;# then try the browser env var as command, or&lt;/span&gt;
+&lt;span class="c1"&gt;# ultimately the static fallback&lt;/span&gt;
+&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-z&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$browsercmd&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;browsercmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BROWSER&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="nv"&gt;$fallbackbrowsercmd&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="nv"&gt;t&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;mktemp&lt;span class="w"&gt; &lt;/span&gt;--suffix&lt;span class="o"&gt;=&lt;/span&gt;.html&lt;span class="k"&gt;)&lt;/span&gt;
+pandoc&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;gfm&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;html&lt;span class="w"&gt; &lt;/span&gt;-M&lt;span class="w"&gt; &lt;/span&gt;document-css&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--standalone&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;/dev/null
+&lt;span class="nv"&gt;$browsercmd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-default-solution"&gt;
+&lt;h3&gt;The default solution&lt;/h3&gt;
+&lt;p&gt;Yes, there is such a thing as &amp;quot;default web browser&amp;quot; in &lt;tt class="docutils literal"&gt;XDG&lt;/tt&gt;, too.&lt;/p&gt;
+&lt;p&gt;Have a look at &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;xdg-settings&lt;/span&gt; &lt;span class="pre"&gt;--list&lt;/span&gt;&lt;/tt&gt;. On my system, it shows a rather modest output:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;xdg-settings&lt;span class="w"&gt; &lt;/span&gt;--list
+&lt;span class="go"&gt;Known properties:&lt;/span&gt;
+&lt;span class="go"&gt;        default-url-scheme-handler    Default handler for URL scheme&lt;/span&gt;
+&lt;span class="go"&gt;        default-web-browser           Default web browser&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And the default web browser is:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;xdg-settings&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;default-web-browser
+&lt;span class="go"&gt;brave-browser.desktop&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Yeah, yeah, yeah. Busted. I use graphical browsers, too.&lt;/p&gt;
+&lt;p&gt;Now let's add this to the mix, then.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nv"&gt;fallbackbrowsercmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;w3m
+&lt;span class="nv"&gt;browsercmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="c1"&gt;# if browser env var not set, set it with default browser&lt;/span&gt;
+&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-z&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$BROWSER&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;BROWSER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;xdg-settings&lt;span class="w"&gt; &lt;/span&gt;get&lt;span class="w"&gt; &lt;/span&gt;default-web-browser&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;BROWSER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BROWSER&lt;/span&gt;&lt;span class="p"&gt;%%.*&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;!&lt;span class="w"&gt; &lt;/span&gt;-z&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$BROWSER&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;XDG_DATA_DIRS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;XDG_DATA_DIRS&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="p"&gt;/usr/share&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;!&lt;span class="w"&gt; &lt;/span&gt;-z&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$XDG_DATA_HOME&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="nv"&gt;XDG_DATA_DIRS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$XDG_DATA_HOME&lt;/span&gt;:&lt;span class="nv"&gt;$XDG_DATA_DIRS&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;_ifs&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$IFS&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;IFS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;:
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;dirs&lt;/span&gt;&lt;span class="o"&gt;=(&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$XDG_DATA_DIRS&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;for&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;d&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;in&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$dirs&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;do&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="nv"&gt;s&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$BROWSER&lt;/span&gt;.desktop
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="nv"&gt;a&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nv"&gt;$d&lt;/span&gt;/applications/&lt;span class="nv"&gt;$BROWSER&lt;/span&gt;.desktop
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$a&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;                        &lt;/span&gt;&lt;span class="nv"&gt;browsercmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;gtk-launch &lt;/span&gt;&lt;span class="nv"&gt;$s&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;
+&lt;span class="w"&gt;                &lt;/span&gt;&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="k"&gt;done&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;IFS&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;
+&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;-z&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="nv"&gt;$browsercmd&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;]&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;then&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="nv"&gt;browsercmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;BROWSER&lt;/span&gt;&lt;span class="k"&gt;:-&lt;/span&gt;&lt;span class="nv"&gt;$fallbackbrowsercmd&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;
+&lt;span class="k"&gt;fi&lt;/span&gt;
+&lt;span class="nv"&gt;t&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;mktemp&lt;span class="w"&gt; &lt;/span&gt;--suffix&lt;span class="o"&gt;=&lt;/span&gt;.html&lt;span class="k"&gt;)&lt;/span&gt;
+pandoc&lt;span class="w"&gt; &lt;/span&gt;-f&lt;span class="w"&gt; &lt;/span&gt;gfm&lt;span class="w"&gt; &lt;/span&gt;-t&lt;span class="w"&gt; &lt;/span&gt;html&lt;span class="w"&gt; &lt;/span&gt;-M&lt;span class="w"&gt; &lt;/span&gt;document-css&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="nb"&gt;false&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;--standalone&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$1&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;2&lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;/dev/null
+&lt;span class="nv"&gt;$browsercmd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;$t&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="naming-the-executioner"&gt;
+&lt;h2&gt;Naming the executioner&lt;/h2&gt;
+&lt;p&gt;So now we have a markdown viewer. And it can be as lean or as heavy as you want it to be. It's all to the browser you choose.&lt;/p&gt;
+&lt;p&gt;To make it accessible, map the script as a command alias in your &lt;tt class="docutils literal"&gt;.profile&lt;/tt&gt; or &lt;tt class="docutils literal"&gt;.bashrc&lt;/tt&gt; and you have the viewer at your fingertips.&lt;/p&gt;
+&lt;p&gt;I call mine &lt;tt class="docutils literal"&gt;wmd&lt;/tt&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nb"&gt;alias&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;wmd&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;bash &lt;/span&gt;&lt;span class="nv"&gt;$HOME&lt;/span&gt;&lt;span class="s2"&gt;/scripts/markdown.sh&amp;quot;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;And voilá:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="gp"&gt;$ &lt;/span&gt;&lt;span class="nb"&gt;export&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nv"&gt;BROWSER&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;lynx
+&lt;span class="gp"&gt;$ &lt;/span&gt;wmd&lt;span class="w"&gt; &lt;/span&gt;README.md
+&lt;/pre&gt;&lt;/div&gt;
+&lt;!--  --&gt;
+&lt;blockquote&gt;
+&lt;table class="docutils footnote" frame="void" id="footnote-1" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#footnote-reference-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Or X Desktop Group, as they were originally called.&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/blockquote&gt;
+&lt;!--  --&gt;
+&lt;blockquote&gt;
+&lt;table class="docutils footnote" frame="void" id="footnote-2" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#footnote-reference-2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Human User Interface. Don't bother looking - I made it up. As the cause of AI, robots and machines inevitably will become appropriated by the woke intersectionality complex, the terminology is probably going to need such distictions.&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/blockquote&gt;
+&lt;!--  --&gt;
+&lt;blockquote&gt;
+&lt;table class="docutils footnote" frame="void" id="footnote-3" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#footnote-reference-3"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Actually the format is &lt;a class="reference external" href="https://en.wikipedia.org/wiki/INI_file"&gt;ini&lt;/a&gt;. The standard is rather in the file naming, really.&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/blockquote&gt;
+&lt;/div&gt;
+</content><category term="Offlining"></category><category term="bash"></category><category term="markdown"></category><category term="pandoc"></category><category term="vimb"></category><category term="w3m"></category><category term="lynx"></category><category term="xdg"></category></entry><entry><title>Secrets in the shell</title><link href="clortho.html" rel="alternate"></link><published>2024-06-25T20:46:00+02:00</published><updated>2024-06-25T21:58:00+02:00</updated><author><name>Louis Holbrook</name></author><id>tag:None,2024-06-25:clortho.html</id><summary type="html">&lt;p class="first last"&gt;A key value store at your fingertips&lt;/p&gt;
 </summary><content type="html">&lt;p&gt;Ever since I started using the &lt;a class="reference external" href="https://www.passwordstore.org/"&gt;pass&lt;/a&gt; CLI as my password manager, I've found myself putting all sorts of stuff in there; usernames, email, urls, crypto addresses, api keys, you name it.&lt;/p&gt;
 &lt;p&gt;It makes total sense that some of these items are in there. For example, I store the url to a service together with the password, usually accompanied by the username and the email used &lt;a class="footnote-reference" href="#footnote-1" id="footnote-reference-1"&gt;[1]&lt;/a&gt;. No password recoveries needed.&lt;/p&gt;
 &lt;p&gt;However, at some point I also started putting in things like crypto addresses, or even token smart contract addresses in there.&lt;/p&gt;
