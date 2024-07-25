@@ -1,17 +1,15 @@
-use super::FeedMethod;
-use super::FeedGet;
-use feed_rs::model::Feed;
-use feed_rs::parser;
-//use http::Uri;
 use std::path::Path;
 use std::path::PathBuf;
 use std::fs::File;
 use std::collections::HashMap;
-//use core::str::FromStr;
-//use std::io::stderr;
 use std::io::Write;
 
+use atom_syndication::Feed;
+
+use super::FeedMethod;
+use super::FeedGet;
 use crate::cache::Cache;
+use crate::rss::from_file as rss_from_file;
 
 
 pub struct FsFeed {
@@ -24,9 +22,15 @@ pub struct FsCache {
 
 impl FeedGet for FsFeed {
     fn get(&self, s: &str, _method: Option<FeedMethod>) -> Result<Feed, u64> {
-        //let uri = Uri::from_str(s).unwrap(); 
-        let f = File::open(s).unwrap();
-        let feed = parser::parse(f).unwrap();
+        let feed: Feed;
+        match rss_from_file(s, false) {
+            Ok(v) => {
+                feed = v;
+            },
+            Err(e) => {
+                return Err(0);
+            },
+        };
         Ok(feed)
     }
 }

@@ -1,4 +1,4 @@
-use feed_rs::model::Feed;
+use atom_syndication::Feed;
 
 pub enum FeedMethod {
     Read,

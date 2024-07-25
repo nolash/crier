@@ -7,25 +7,26 @@ use std::fmt::Debug;
 use std::io::BufWriter;
 use std::str::FromStr;
 
-use feed_rs::model::Entry;
-use feed_rs::model::Feed;
 use rs_sha512::Sha512Hasher;
-//use chrono::DateTime;
 use chrono::Local;
-use atom_syndication::Feed as OutFeed;
-use atom_syndication::Entry as OutEntry;
+use atom_syndication::Feed as Feed;
+use atom_syndication::Entry as Entry;
 use atom_syndication::TextType as OutTextType;
 use atom_syndication::Text as OutText;
 use atom_syndication::Content as OutContent;
 use atom_syndication::Person as OutPerson;
 use atom_syndication::Category as OutCategory;
 use atom_syndication::FixedDateTime;
+use atom_syndication::Person;
 use itertools::Itertools;
 
+pub mod io;
+pub mod mem;
+
 mod meta;
-mod io;
-mod mem;
 mod cache;
+mod rss;
+mod log;
 use meta::FeedMetadata;
 use mem::CacheWriter;
 use cache::Cache;
@@ -34,8 +35,9 @@ use cache::Cache;
 pub enum Error {
     WriteError,
     CacheError,
+    ParseError,
+    IncompleteError,
 }
-
 
 pub struct Sequencer<'a> {
     metadata: FeedMetadata,
@@ -74,6 +76,18 @@ impl<'a> Sequencer<'a> {
     pub fn with_cache(mut self, w: &'a mut impl Cache) -> Sequencer<'a> {
         self.cache = Some(w);
         return self;
+    }
+
+    pub fn set_author(&mut self, name: &str) -> bool {
+        self.metadata.set_author(Person{
+            name: String::from(name),
+            email: None,
+            uri: None,
+        })
+    }
+
+    pub fn set_title(&mut self, title: &str) -> bool {
+        self.metadata.set_title(String::from(title))
     }
 
     pub fn add(&mut self, entry: Entry) -> bool {
@@ -117,11 +131,11 @@ impl<'a> Sequencer<'a> {
         c
     }
 
-    fn write_to(&mut self, w: impl Write) -> Result<usize, Error> {
+    pub fn write_to(&mut self, w: impl Write) -> Result<usize, Error> {
         let mut r: usize;
-        let mut feed = OutFeed::default();
-        let mut entry: OutEntry;
-        let mut entries: Vec<OutEntry>;
+        let mut feed = Feed::default();
+        let mut entry: Entry;
+        let mut entries: Vec<Entry>;
         let mut b: &str;
         feed.set_id("urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6");
         feed.set_updated(Local::now().to_utc());
@@ -138,7 +152,7 @@ impl<'a> Sequencer<'a> {
         r = 0;
         for v in self {
             b = std::str::from_utf8(v.as_slice()).unwrap();
-            match OutEntry::from_str(b) {
+            match Entry::from_str(b) {
                 Err(e) => {
                     println!("fromstrerr {:?}", e);
                     return Err(Error::CacheError);
@@ -216,16 +230,10 @@ impl SequencerEntry {
         }
 
         if !have_date {
-            match &o.entry.updated {
-                Some(v) => {
-                    id_part = v.timestamp() as u32;
-                    o.digest = id_part as u64;
-                    o.digest <<= 32;
-                    have_date = true;
-                },
-                None => {
-                },
-            }
+            id_part = o.entry.updated.timestamp() as u32;
+            o.digest = id_part as u64;
+            o.digest <<= 32;
+            have_date = true;
         }
         
         let mut h = Sha512Hasher::default();
@@ -240,12 +248,13 @@ impl SequencerEntry {
     fn to_writer(&self, v: Vec<u8>) -> BufWriter<Vec<u8>> {
         BufWriter::with_capacity(10241024, v)
     }
+
 }
 
 /// TODO: split out field translations to separate module
 impl Into<Vec<u8>> for SequencerEntry {
     fn into(self) -> Vec<u8> {
-        let mut out_entry: OutEntry;
+        let mut out_entry: Entry;
         let mut b: Vec<u8>;
         let mut w: BufWriter<Vec<u8>>;
         let o: &SequencerEntry;
@@ -254,93 +263,7 @@ impl Into<Vec<u8>> for SequencerEntry {
         b = Vec::new();
         w = o.to_writer(b);
 
-        out_entry = OutEntry::default();
-        out_entry.set_id(self.entry.id);
-        out_entry.set_title(self.entry.title.unwrap().content);
-
-        let mut d = FixedDateTime::parse_from_rfc2822(self.entry.published.unwrap().to_rfc2822().as_str()).unwrap();
-        out_entry.set_published(Some(d.clone()));
-
-        match self.entry.updated {
-            Some(v) => {
-                d = FixedDateTime::parse_from_rfc2822(v.to_rfc2822().as_str()).unwrap();
-                out_entry.set_updated(d.clone());
-            },
-            None => {},
-        }
-
-        match self.entry.summary {
-            Some(v) => {
-                let text_out: OutText;
-                let summary_out_type: OutTextType;
-                let summary_subtype = String::from(v.content_type.subty().as_str());
-                if summary_subtype.contains("xhtml") {
-                    summary_out_type = OutTextType::Xhtml;
-                } else if summary_subtype.contains("html") {
-                    summary_out_type = OutTextType::Html;
-                } else {
-                    summary_out_type = OutTextType::Text;
-                }
-                text_out = OutText{
-                    value: v.content,
-                    r#type: summary_out_type,
-                    base: None,
-                    lang: None,
-                };
-                out_entry.set_summary(Some(text_out));
-            },
-            None => {},
-        }
-
-        match self.entry.content {
-            Some(v) => {
-                let mut content_out = OutContent::default();
-                content_out.content_type = Some(String::from(v.content_type.as_str()));
-                match v.src {
-                    Some(vv) => {
-                        content_out.src = Some(vv.href);
-                    },
-                    None => {},
-                };
-                match v.body {
-                    Some(vv) => {
-                        content_out.value = Some(vv);
-                    },
-                    None => {},
-                };
-                out_entry.set_content(Some(content_out));
-            },
-            None => {},
-        }
-
-        for v in self.entry.authors {
-            let o = OutPerson{
-                name: v.name,
-                uri: v.uri,
-                email: v.email,
-            };
-            out_entry.authors.push(o);
-        }
-
-        for v in self.entry.contributors {
-            let o = OutPerson{
-                name: v.name,
-                uri: v.uri,
-                email: v.email,
-            };
-            out_entry.contributors.push(o);
-        }
-
-        for v in self.entry.categories {
-            let o = OutCategory {
-                term: v.term,
-                scheme: v.scheme,
-                label: v.label,
-            };
-            out_entry.categories.push(o);
-        }
-
-        w = out_entry.write_to(w).unwrap();
+        w = self.entry.write_to(w).unwrap();
         b = Vec::from(w.buffer());
         b
     }
