@@ -20,6 +20,7 @@ use atom_syndication::Content as OutContent;
 use atom_syndication::Person as OutPerson;
 use atom_syndication::Category as OutCategory;
 use atom_syndication::FixedDateTime;
+use atom_syndication::Person;
 use itertools::Itertools;
 
 pub mod io;
@@ -75,6 +76,18 @@ impl<'a> Sequencer<'a> {
     pub fn with_cache(mut self, w: &'a mut impl Cache) -> Sequencer<'a> {
         self.cache = Some(w);
         return self;
+    }
+
+    pub fn set_author(&mut self, name: &str) -> bool {
+        self.metadata.set_author(Person{
+            name: String::from(name),
+            email: None,
+            uri: None,
+        })
+    }
+
+    pub fn set_title(&mut self, title: &str) -> bool {
+        self.metadata.set_title(String::from(title))
     }
 
     pub fn add(&mut self, entry: Entry) -> bool {

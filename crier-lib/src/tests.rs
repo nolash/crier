@@ -10,11 +10,15 @@ use chrono::DateTime;
 use tempfile::NamedTempFile;
 use tempfile::tempdir;
 use atom_syndication::Entry as OutEntry;
+use atom_syndication::Feed as OutFeed;
+use atom_syndication::Person;
 use quick_xml::Reader as XMLReader;
 use quick_xml::events::Event as XMLEvent;
 
 use crate::Sequencer;
 use crate::io::FeedGet;
+use crate::meta::FeedMetadata;
+use crate::Feed;
 use crate::io::fs::FsCache;
 
 #[cfg(feature = "fs")]
@@ -249,3 +253,33 @@ fn test_sequence_order() {
     r = seq.next().unwrap();
     check_xml_title(r, "clyde");
 }
+
+#[test]
+fn test_meta() {
+    let mut o = FeedMetadata::default();
+    let mut feed = OutFeed::default();
+
+    match o.apply(&mut feed) {
+        Ok(r) => {
+            panic!("metadata should not be ready");
+        },
+        Err(e) => {},
+    };
+
+    o.set_title(String::from("foo"));
+    match o.apply(&mut feed) {
+        Ok(r) => {
+            panic!("metadata should not be ready");
+        },
+        Err(e) => {},
+    };
+
+    o.set_author(Person{
+                name: String::from("Foo Bar"),
+                email: Some("foo@bar.com".to_string()),
+                uri: Some("foo.bar.com".to_string()),
+            }
+    );
+    o.apply(&mut feed).unwrap();
+}
+

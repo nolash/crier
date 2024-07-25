@@ -86,6 +86,10 @@ fn main() {
     let mut cache = MemCache::new();
     let mut seq = Sequencer::new().with_cache(&mut cache);
 
+    seq.set_title("my new feed");
+    seq.set_author("Foo Bar");
+
+
 #[cfg(feature = "logging")]
     env_logger::init();
 
