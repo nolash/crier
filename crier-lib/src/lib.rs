@@ -22,9 +22,10 @@ use atom_syndication::Category as OutCategory;
 use atom_syndication::FixedDateTime;
 use itertools::Itertools;
 
+pub mod io;
+pub mod mem;
+
 mod meta;
-mod io;
-mod mem;
 mod cache;
 use meta::FeedMetadata;
 use mem::CacheWriter;
@@ -34,8 +35,8 @@ use cache::Cache;
 pub enum Error {
     WriteError,
     CacheError,
+    ParseError,
 }
-
 
 pub struct Sequencer<'a> {
     metadata: FeedMetadata,
@@ -117,7 +118,7 @@ impl<'a> Sequencer<'a> {
         c
     }
 
-    fn write_to(&mut self, w: impl Write) -> Result<usize, Error> {
+    pub fn write_to(&mut self, w: impl Write) -> Result<usize, Error> {
         let mut r: usize;
         let mut feed = OutFeed::default();
         let mut entry: OutEntry;
