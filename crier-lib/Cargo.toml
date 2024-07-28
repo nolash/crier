@@ -8,7 +8,6 @@ authors = ["Louis Holbrook <dev@holbrook.no>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-feed-rs = "^2.0"
 #activitypub_federation = "^0.4.0"
 #json-ld = "^0.14.1"
 digest = "^0.10.7"
@@ -16,7 +15,6 @@ digest = "^0.10.7"
 rs_sha512 = "^0.1.3"
 http = "^1.0"
 chrono = "^0.4"
-uuid = "^1.9"
 itertools = "^0.13"
 serde = "^1.0"
 atom_syndication = "^0.12"
@@ -24,6 +22,10 @@ atom_syndication = "^0.12"
 #[dependencies.quick-xml]
 #version = "^0.31"
 #features = ["serialize"]
+
+[dependencies.uuid]
+version = "^1.9"
+features = ["v4"]
 
 [dependencies.rss]
 version = "^2.0"
