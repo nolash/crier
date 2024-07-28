@@ -3,8 +3,6 @@ use std::fs::File;
 use std::io::{SeekFrom, Seek, Read};
 use std::str;
 
-//use feed_rs::model::Entry;
-//use feed_rs::model::Text;
 use mediatype::MediaTypeBuf;
 use chrono::DateTime;
 use tempfile::NamedTempFile;

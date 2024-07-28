@@ -1,10 +1,7 @@
-//use http::Uri;
 use std::path::Path;
 use std::path::PathBuf;
 use std::fs::File;
 use std::collections::HashMap;
-//use core::str::FromStr;
-//use std::io::stderr;
 use std::io::Write;
 
 use atom_syndication::Feed;
@@ -26,7 +23,6 @@ pub struct FsCache {
 impl FeedGet for FsFeed {
     fn get(&self, s: &str, _method: Option<FeedMethod>) -> Result<Feed, u64> {
         let feed: Feed;
-        //let uri = Uri::from_str(s).unwrap(); 
         match rss_from_file(s, false) {
             Ok(v) => {
                 feed = v;

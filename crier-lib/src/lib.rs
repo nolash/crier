@@ -7,10 +7,7 @@ use std::fmt::Debug;
 use std::io::BufWriter;
 use std::str::FromStr;
 
-//use feed_rs::model::Entry;
-//use feed_rs::model::Feed;
 use rs_sha512::Sha512Hasher;
-//use chrono::DateTime;
 use chrono::Local;
 use atom_syndication::Feed as Feed;
 use atom_syndication::Entry as Entry;
@@ -231,19 +228,13 @@ impl SequencerEntry {
             None => {
             },
         }
-//
-//        if !have_date {
-//            match &o.entry.updated {
-//                Some(v) => {
-//                    id_part = v.timestamp() as u32;
-//                    o.digest = id_part as u64;
-//                    o.digest <<= 32;
-//                    have_date = true;
-//                },
-//                None => {
-//                },
-//            }
-//        }
+
+        if !have_date {
+            id_part = o.entry.updated.timestamp() as u32;
+            o.digest = id_part as u64;
+            o.digest <<= 32;
+            have_date = true;
+        }
         
         let mut h = Sha512Hasher::default();
         o.hash(&mut h);
@@ -272,96 +263,6 @@ impl Into<Vec<u8>> for SequencerEntry {
         b = Vec::new();
         w = o.to_writer(b);
 
-//        //let mut d = get_base_date(&self.entry);
-//        let mut d = Local::now().to_utc();
-//
-//        out_entry = Entry::default();
-//        out_entry.set_id(self.entry.id);
-//        //out_entry.set_title(self.entry.title.unwrap().content);
-//        out_entry.set_title(self.entry.title);
-//
-//        //out_entry.set_published(d.clone());
-//
-////        match self.entry.updated {
-////            Some(v) => {
-////                d = FixedDateTime::parse_from_rfc2822(v.to_rfc2822().as_str()).unwrap();
-////                out_entry.set_updated(d.clone());
-////            },
-////            None => {},
-////        }
-//
-//        match self.entry.summary {
-//            Some(v) => {
-//                let text_out: OutText;
-//                let summary_out_type: OutTextType;
-//                let summary_subtype = String::from(v.content_type.subty().as_str());
-//                if summary_subtype.contains("xhtml") {
-//                    summary_out_type = OutTextType::Xhtml;
-//                } else if summary_subtype.contains("html") {
-//                    summary_out_type = OutTextType::Html;
-//                } else {
-//                    summary_out_type = OutTextType::Text;
-//                }
-//                text_out = OutText{
-//                    value: v.content,
-//                    r#type: summary_out_type,
-//                    base: None,
-//                    lang: None,
-//                };
-//                out_entry.set_summary(Some(text_out));
-//            },
-//            None => {},
-//        }
-//
-//        match self.entry.content {
-//            Some(v) => {
-//                let mut content_out = OutContent::default();
-//                content_out.content_type = Some(String::from(v.content_type.as_str()));
-//                match v.src {
-//                    Some(vv) => {
-//                        content_out.src = Some(vv.href);
-//                    },
-//                    None => {},
-//                };
-//                match v.body {
-//                    Some(vv) => {
-//                        content_out.value = Some(vv);
-//                    },
-//                    None => {},
-//                };
-//                out_entry.set_content(Some(content_out));
-//            },
-//            None => {},
-//        }
-//
-//        for v in self.entry.authors {
-//            let o = OutPerson{
-//                name: v.name,
-//                uri: v.uri,
-//                email: v.email,
-//            };
-//            out_entry.authors.push(o);
-//        }
-//
-//        for v in self.entry.contributors {
-//            let o = OutPerson{
-//                name: v.name,
-//                uri: v.uri,
-//                email: v.email,
-//            };
-//            out_entry.contributors.push(o);
-//        }
-//
-//        for v in self.entry.categories {
-//            let o = OutCategory {
-//                term: v.term,
-//                scheme: v.scheme,
-//                label: v.label,
-//            };
-//            out_entry.categories.push(o);
-//        }
-
-        //w = out_entry.write_to(w).unwrap();
         w = self.entry.write_to(w).unwrap();
         b = Vec::from(w.buffer());
         b
