@@ -7,7 +7,6 @@ use std::str::from_utf8;
 use clap::Arg;
 use clap::App;
 
-#[cfg(feature="logging")]
 use log::debug;
 use log::info;
 use env_logger;
@@ -90,7 +89,6 @@ fn main() {
     seq.set_author("Foo Bar");
 
 
-#[cfg(feature = "logging")]
     env_logger::init();
 
     debug!("config has {} uris", cfg.urls.len());

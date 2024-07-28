@@ -26,7 +26,6 @@ pub mod mem;
 mod meta;
 mod cache;
 mod rss;
-mod log;
 use meta::FeedMetadata;
 use mem::CacheWriter;
 use cache::Cache;

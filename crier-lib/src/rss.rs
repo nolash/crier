@@ -3,9 +3,9 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::BufRead;
 use crate::Error;
-use crate::log::info;
-use crate::log::debug;
 
+use log::info;
+use log::debug;
 use rss::Channel;
 use rss::Item;
 use rss::extension::dublincore::DublinCoreExtension;
@@ -173,7 +173,7 @@ pub fn from_file(fp: &str, allow_entry_fail: bool) -> Result<Feed, Error> {
 mod test {
     use std::path::Path;
     use atom_syndication::Feed;
-    use crate::log;
+    use env_logger;
 
     #[test]
     fn test_rss_from_file() {

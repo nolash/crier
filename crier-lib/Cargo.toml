@@ -15,6 +15,8 @@ chrono = "^0.4"
 itertools = "^0.13"
 serde = "^1.0"
 atom_syndication = "^0.12"
+log = "^0.4"
+env_logger = "^0.9"
 
 [dependencies.uuid]
 version = "^1.9"
@@ -32,14 +34,6 @@ tempfile = "3.3.0"
 mediatype = "^0.19"
 quick-xml = "^0.31"
 
-[dependencies.env_logger]
-version = "^0.9"
-optional = true
-
-[dependencies.log]
-version = "^0.4"
-optional = true
 
 [features]
 fs = []
-logging = ["log", "env_logger"]
