@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
+use std::io::BufRead;
 use crate::Error;
 use crate::log::info;
 use crate::log::debug;
@@ -139,10 +140,23 @@ fn translate(ipt: Channel, allow_fail: bool) -> Result<Feed, Error> {
 pub fn from_file(fp: &str, allow_entry_fail: bool) -> Result<Feed, Error> {
     let mut o: Channel;
     let r: Feed;
+    let p: &Path; 
+    let mut f: File;
+    //let mut b: BufReader; // how to explicitly declare 
 
-    let p = Path::new(fp);
-    let f = File::open(p).unwrap();
-    let b = BufReader::new(f);
+    p = Path::new(fp);
+    f = File::open(p).unwrap();
+    let mut b = BufReader::new(f);
+
+    match Feed::read_from(b) {
+        Ok(v) => {
+            return Ok(v);
+        },
+        Err(e) => {},
+    };
+
+    f = File::open(p).unwrap();
+    b = BufReader::new(f);
 
     match Channel::read_from(b) {
         Ok(v) => {
@@ -155,7 +169,6 @@ pub fn from_file(fp: &str, allow_entry_fail: bool) -> Result<Feed, Error> {
     o.set_dublin_core_ext(DublinCoreExtension::default());
     translate(o, allow_entry_fail)
 }
-
 
 mod test {
     use std::path::Path;
@@ -173,12 +186,12 @@ mod test {
                 panic!("{:?}", e);
             },
         };
-//        match super::from_file("testdata/test.atom.xml", false) {
-//            Ok(v) => {
-//                panic!("expected fail");
-//            },
-//            Err(e) => {
-//            },
-//        };
+        match super::from_file("testdata/test.atom.xml", false) {
+            Ok(v) => {
+            },
+            Err(e) => {
+                panic!("expected fail");
+            },
+        };
     }
 }
