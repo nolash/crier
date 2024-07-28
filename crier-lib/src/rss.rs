@@ -6,6 +6,7 @@ use crate::Error;
 
 use log::info;
 use log::debug;
+
 use rss::Channel;
 use rss::Item;
 use rss::extension::dublincore::DublinCoreExtension;
