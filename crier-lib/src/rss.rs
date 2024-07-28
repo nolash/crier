@@ -15,6 +15,8 @@ use atom_syndication::Entry;
 use atom_syndication::Text;
 use atom_syndication::TextType;
 use atom_syndication::FixedDateTime;
+use atom_syndication::Content;
+use atom_syndication::Category;
 use chrono::naive::NaiveDateTime;
 use chrono::Local;
 use chrono::offset::Utc;
@@ -101,12 +103,59 @@ fn translate_item(ipt: Item) -> Result<Entry, Error> {
 
     match get_base_date(&ipt) {
         Ok(v) => {
-            opt.set_published(v);
+            opt.set_published(v.clone());
+            opt.set_updated(v);
         },
         Err(e) => {
             return Err(e);
         }
+    };
+   
+    match ipt.description {
+        Some(v) => {
+            opt.set_summary(Some(Text::plain(v)));
+        },
+        _ => {},
+    };
+
+    match ipt.content {
+        Some(v) => {
+            let mut r = Content::default();
+            r.set_content_type(Some(String::from("text/html")));
+            r.set_value(Some(v));
+            match ipt.source {
+                Some(v) => {
+                    r.set_src(v.url);
+                },
+                _ => {},
+            }
+            opt.set_content(Some(r));
+        },
+        _ => {},
+    };
+
+    match ipt.guid {
+        Some(v) => {
+            if v.is_permalink() {
+                opt.set_id(String::from(v.value()));
+            }
+        },
+        _ => {},
+    };
+
+    for v in ipt.categories {
+        let mut cat = Category::default();
+        cat.set_term(String::from(v.name()));
+        cat.set_label(Some(v.name));
+        match v.domain {
+            Some(v) => {
+                cat.set_scheme(Some(v));
+            },
+            _ => {},
+        };
+        opt.categories.push(cat);
     }
+
     Ok(opt)
 }
 
