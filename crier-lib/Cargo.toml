@@ -8,9 +8,7 @@ authors = ["Louis Holbrook <dev@holbrook.no>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#rss = "^2.0.3"
 feed-rs = "^2.0"
-rss = "^2.0"
 #activitypub_federation = "^0.4.0"
 #json-ld = "^0.14.1"
 digest = "^0.10.7"
@@ -27,6 +25,10 @@ atom_syndication = "^0.12"
 #version = "^0.31"
 #features = ["serialize"]
 
+[dependencies.rss]
+version = "^2.0"
+features = ["atom"]
+
 [patch.crates-io]
 #atom_syndication = { path = "/home/lash/src/contrib/atom_syndication" }
 atom_syndication = { git = "git://holbrook.no/contrib/atom_syndication", rev="9985c1610b2b819f5bd2f7a719567ee0b5419b85" } #branch="lash/entry-fromstr"
@@ -36,5 +38,14 @@ tempfile = "3.3.0"
 mediatype = "^0.19"
 quick-xml = "^0.31"
 
+[dependencies.env_logger]
+version = "^0.9"
+optional = true
+
+[dependencies.log]
+version = "^0.4"
+optional = true
+
 [features]
 fs = []
+logging = ["log", "env_logger"]

@@ -28,6 +28,8 @@ pub mod mem;
 
 mod meta;
 mod cache;
+mod rss;
+mod log;
 use meta::FeedMetadata;
 use mem::CacheWriter;
 use cache::Cache;
@@ -37,6 +39,7 @@ pub enum Error {
     WriteError,
     CacheError,
     ParseError,
+    IncompleteError,
 }
 
 pub struct Sequencer<'a> {
@@ -254,6 +257,27 @@ impl SequencerEntry {
     fn to_writer(&self, v: Vec<u8>) -> BufWriter<Vec<u8>> {
         BufWriter::with_capacity(10241024, v)
     }
+
+}
+
+fn get_base_date(entry: &Entry) -> FixedDateTime {
+    let d: FixedDateTime;
+
+    match entry.published {
+        Some(v) => {
+           return FixedDateTime::parse_from_rfc2822(v.to_rfc2822().as_str()).unwrap(); 
+        },
+        None => {},
+    };
+
+    match entry.updated {
+        Some(v) => {
+           return FixedDateTime::parse_from_rfc2822(v.to_rfc2822().as_str()).unwrap(); 
+        },
+        None => {},
+    };
+    
+    return FixedDateTime::parse_from_rfc2822(entry.updated.unwrap().to_rfc2822().as_str()).unwrap();
 }
 
 /// TODO: split out field translations to separate module
@@ -268,11 +292,13 @@ impl Into<Vec<u8>> for SequencerEntry {
         b = Vec::new();
         w = o.to_writer(b);
 
+        let mut d = get_base_date(&self.entry);
+
         out_entry = OutEntry::default();
         out_entry.set_id(self.entry.id);
         out_entry.set_title(self.entry.title.unwrap().content);
 
-        let mut d = FixedDateTime::parse_from_rfc2822(self.entry.published.unwrap().to_rfc2822().as_str()).unwrap();
+
         out_entry.set_published(Some(d.clone()));
 
         match self.entry.updated {

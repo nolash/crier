@@ -20,6 +20,7 @@ use crate::io::FeedGet;
 use crate::meta::FeedMetadata;
 use crate::Feed;
 use crate::io::fs::FsCache;
+use crate::mem::MemCache;
 
 #[cfg(feature = "fs")]
 use crate::io::fs::FsFeed;
@@ -283,3 +284,15 @@ fn test_meta() {
     o.apply(&mut feed).unwrap();
 }
 
+#[test]
+fn test_rss() {
+let fs = FsFeed{};
+    let mut cache = MemCache::new();
+    let fs = FsFeed{};
+
+    let feed = fs.get("testdata/test.rss.xml", None).unwrap();
+    let mut seq = Sequencer::new();
+    seq = seq.with_cache(&mut cache);
+    
+    seq.add_from(feed);
+}
