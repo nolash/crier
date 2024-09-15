@@ -140,7 +140,14 @@ fn translate_item(ipt: Item) -> Result<Entry, Error> {
                 opt.set_id(String::from(v.value()));
             }
         },
-        _ => {},
+        _ => {
+            match ipt.link {
+                Some(v) => {
+                    opt.set_id(v.clone());
+                },
+                _ => {},
+            }
+        },
     };
 
     for v in ipt.categories {
