@@ -1,0 +1,4 @@
+- 0.1.0
+	* Support for local filesystem source files.
+	* Handle RSS and Atom input.
+	* Use RSS 1.0 link element as guid.

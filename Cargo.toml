@@ -2,7 +2,9 @@
 name = "crier-bin"
 version = "0.0.1"
 edition = "2021"
+license = "AGPL-3.0-or-later"
 rust-version = "1.79"
+description = "Chronologically aggregate atom and rss feeds into a single atom feed."
 authors = ["Louis Holbrook <dev@holbrook.no>"]
 
 [dependencies]
