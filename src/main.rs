@@ -20,26 +20,53 @@ use crier::Error;
 
 struct Config {
     urls: Vec<String>,
+    author: String,
+    title: String,
 }
 
 impl Config {
-    fn new(urls: Vec<String>) -> Config {
+    fn new(title: String, author: String, urls: Vec<String>) -> Config {
         Config {
             urls: urls,
+            title: title,
+            author: author,
         }
     }
 }
 
 fn parse() -> Config {
-    let m = App::new("crier")
+    let mut o = App::new("crier")
     .version(env!("CARGO_PKG_VERSION"))
-    .author(env!("CARGO_PKG_AUTHORS"))
-    .arg(Arg::with_name("URLS")
-        .multiple(true)
-        .help("list of uris to merge"))
-    .get_matches();
+    .author(env!("CARGO_PKG_AUTHORS"));
 
-    Config::new(m.values_of("URLS").unwrap().map(|v| String::from(v)).collect())
+    o = o.arg(
+        Arg::with_name("title")
+            .long("title")
+            .short("t")
+            .value_name("Aggregated feed title")
+            .takes_value(true)
+            .required(true)
+    );
+
+    o = o.arg(
+        Arg::with_name("author")
+            .long("author")
+            .short("a")
+            .value_name("Aggregated feed author")
+            .takes_value(true)
+            .required(true)
+    );
+
+    o = o.arg(Arg::with_name("URLS")
+        .multiple(true)
+        .help("list of uris to merge"));
+
+    let m = o.get_matches();
+
+    Config::new(
+        String::from(m.value_of("title").unwrap()),
+        String::from(m.value_of("author").unwrap()),
+        m.values_of("URLS").unwrap().map(|v| String::from(v)).collect())
 }
 
 fn add_feed(seq: &mut Sequencer, getter: impl FeedGet, uri: String) -> Result<i64, Error> {
@@ -85,9 +112,8 @@ fn main() {
     let mut cache = MemCache::new();
     let mut seq = Sequencer::new().with_cache(&mut cache);
 
-    seq.set_title("my new feed");
-    seq.set_author("Foo Bar");
-
+    seq.set_title(cfg.title.as_str());
+    seq.set_author(cfg.author.as_str());
 
     env_logger::init();
 

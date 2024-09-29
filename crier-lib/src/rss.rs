@@ -6,6 +6,7 @@ use crate::Error;
 
 use log::info;
 use log::debug;
+use log::error;
 
 use rss::Channel;
 use rss::Item;
@@ -113,25 +114,28 @@ fn translate_item(ipt: Item) -> Result<Entry, Error> {
    
     match ipt.description {
         Some(v) => {
-            opt.set_summary(Some(Text::plain(v)));
+            opt.set_summary(Some(Text::xhtml(v)));
         },
-        _ => {},
-    };
-
-    match ipt.content {
-        Some(v) => {
-            let mut r = Content::default();
-            r.set_content_type(Some(String::from("text/html")));
-            r.set_value(Some(v));
-            match ipt.source {
+        _ => {
+            match ipt.content {
                 Some(v) => {
-                    r.set_src(v.url);
+                    let mut r = Content::default();
+                    r.set_content_type(Some(String::from("text/html")));
+                    r.set_value(Some(v));
+                    match ipt.source {
+                        Some(v) => {
+                            r.set_src(v.url);
+                        },
+                        _ => {},
+                    }
+                    opt.set_content(Some(r));
                 },
-                _ => {},
-            }
-            opt.set_content(Some(r));
+                _ => {
+                    error!("have neither summary nor content");
+                    return Err(Error::IncompleteError);
+                },
+            };
         },
-        _ => {},
     };
 
     match ipt.guid {
@@ -207,6 +211,7 @@ pub fn from_file(fp: &str, allow_entry_fail: bool) -> Result<Feed, Error> {
 
     match Feed::read_from(b) {
         Ok(v) => {
+            debug!("have atom feed");
             return Ok(v);
         },
         Err(e) => {},
@@ -217,6 +222,7 @@ pub fn from_file(fp: &str, allow_entry_fail: bool) -> Result<Feed, Error> {
 
     match Channel::read_from(b) {
         Ok(v) => {
+            debug!("have RSS feed");
             o = v;
         },
         Err(e) => {

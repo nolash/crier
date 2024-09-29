@@ -7,6 +7,8 @@ use std::fmt::Debug;
 use std::io::BufWriter;
 use std::str::FromStr;
 
+use log::error;
+
 use rs_sha512::Sha512Hasher;
 use chrono::Local;
 use atom_syndication::Feed as Feed;
@@ -18,6 +20,7 @@ use atom_syndication::Person as OutPerson;
 use atom_syndication::Category as OutCategory;
 use atom_syndication::FixedDateTime;
 use atom_syndication::Person;
+use atom_syndication::Generator;
 use itertools::Itertools;
 
 pub mod io;
@@ -139,6 +142,13 @@ impl<'a> Sequencer<'a> {
         feed.set_id("urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6");
         feed.set_updated(Local::now().to_utc());
 
+        let g = Generator{
+            value: String::from("Crier"),
+            uri: Some(String::from(env!("CARGO_PKG_HOMEPAGE"))),
+            version: Some(String::from(env!("CARGO_PKG_VERSION"))),
+        };
+        feed.set_generator(g);
+
         match self.metadata.apply(&mut feed) {
             Err(_v) => {
                 return Err(Error::WriteError);
@@ -153,7 +163,7 @@ impl<'a> Sequencer<'a> {
             b = std::str::from_utf8(v.as_slice()).unwrap();
             match Entry::from_str(b) {
                 Err(e) => {
-                    println!("fromstrerr {:?}", e);
+                    error!("fromstrerr {:?}", e);
                     return Err(Error::CacheError);
                 },
                 Ok(o) => {
