@@ -6,8 +6,8 @@ use std::io::Write;
 use std::fmt::Debug;
 use std::io::BufWriter;
 use std::str::FromStr;
-
 use log::error;
+use uuid::Uuid;
 
 use rs_sha512::Sha512Hasher;
 use chrono::Local;
@@ -23,6 +23,7 @@ use atom_syndication::Person;
 use atom_syndication::Generator;
 use itertools::Itertools;
 
+
 pub mod io;
 pub mod mem;
 
@@ -32,6 +33,8 @@ mod rss;
 use meta::FeedMetadata;
 use mem::CacheWriter;
 use cache::Cache;
+
+static NAMESPACE_URL_CRIER: &[u8] = b"defalsify.org/src/crier";
 
 #[derive(Debug)]
 pub enum Error {
@@ -49,6 +52,7 @@ pub struct Sequencer<'a> {
     limit: usize,
     default_cache: CacheWriter, //HashMap<String, Vec<u8>>,
     cache: Option<&'a mut dyn Cache>,
+    guuid: Uuid,
 }
 
 pub struct SequencerEntry {
@@ -58,7 +62,8 @@ pub struct SequencerEntry {
 }
 
 impl<'a> Sequencer<'a> {
-    pub fn new() -> Sequencer<'a> {
+    pub fn new(guuid_value: Vec<u8>) -> Sequencer<'a> {
+        let namespace_crier = Uuid::new_v5(&Uuid::NAMESPACE_URL, NAMESPACE_URL_CRIER);
         let mut o = Sequencer {
             metadata: FeedMetadata::default(),
             items: HashMap::new(),
@@ -67,6 +72,7 @@ impl<'a> Sequencer<'a> {
             item_keys: Vec::new(),
             default_cache: CacheWriter::new(), //HashMap::new(),
             cache: None,
+            guuid: Uuid::new_v5(&namespace_crier, guuid_value.as_ref()),
         };
 
         #[cfg(test)]
@@ -139,7 +145,8 @@ impl<'a> Sequencer<'a> {
         let mut entry: Entry;
         let mut entries: Vec<Entry>;
         let mut b: &str;
-        feed.set_id("urn:uuid:60a76c80-d399-11d9-b91C-0003939e0af6");
+        let id: String = self.guuid.into();
+        feed.set_id(id);
         feed.set_updated(Local::now().to_utc());
 
         let g = Generator{

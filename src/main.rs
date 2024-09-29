@@ -4,6 +4,8 @@ use std::process;
 use std::io::stdout;
 use std::str::from_utf8;
 
+use uuid::Uuid;
+
 use clap::Arg;
 use clap::App;
 
@@ -17,19 +19,20 @@ use crier::mem::MemCache;
 use crier::io::fs::FsFeed;
 use crier::Error;
 
-
 struct Config {
     urls: Vec<String>,
     author: String,
     title: String,
+    id: String,
 }
 
 impl Config {
-    fn new(title: String, author: String, urls: Vec<String>) -> Config {
+    fn new(id: String, title: String, author: String, urls: Vec<String>) -> Config {
         Config {
             urls: urls,
             title: title,
             author: author,
+            id: id,
         }
     }
 }
@@ -57,6 +60,16 @@ fn parse() -> Config {
             .required(true)
     );
 
+    // TODO: implement auto generate id when missing
+    o = o.arg(
+        Arg::with_name("id")
+            .long("id")
+            .short("i")
+            .value_name("Aggregated feed id uuid value")
+            .takes_value(true)
+            .required(true)
+    );
+
     o = o.arg(Arg::with_name("URLS")
         .multiple(true)
         .help("list of uris to merge"));
@@ -64,6 +77,7 @@ fn parse() -> Config {
     let m = o.get_matches();
 
     Config::new(
+        String::from(m.value_of("id").unwrap()),
         String::from(m.value_of("title").unwrap()),
         String::from(m.value_of("author").unwrap()),
         m.values_of("URLS").unwrap().map(|v| String::from(v)).collect())
@@ -110,7 +124,9 @@ fn process_entry(seq: &mut Sequencer, uri: String) -> Result<(), Error> {
 fn main() {
     let cfg = parse();
     let mut cache = MemCache::new();
-    let mut seq = Sequencer::new().with_cache(&mut cache);
+
+    let id: Vec<u8> = cfg.id.into();
+    let mut seq = Sequencer::new(id).with_cache(&mut cache);
 
     seq.set_title(cfg.title.as_str());
     seq.set_author(cfg.author.as_str());
